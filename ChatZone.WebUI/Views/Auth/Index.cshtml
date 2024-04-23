@@ -1,0 +1,53 @@
+﻿@using ChatZone.WebUI.ViewModels.Users
+
+@{
+	Layout = "_AuthLayout";
+}
+
+<div class="login-page">
+	<div class="form">
+		<partial name="_RegisterPartial" model="new RegisterViewModel()"/>
+		<partial name="_LoginPartial"  model="new LoginViewModel()"/>
+		
+	</div>
+</div>
+
+@section scripts
+{
+	
+	<script>
+
+		$(document).ready(function() {
+
+			var route = location.href.split('#')[1];
+			var route2 = location.href.split('/')[4];
+
+			if (route === "register") {
+
+				$("#login").slideUp();
+				$("#register").fadeIn();
+			}
+			if (route === "login") {
+
+				$("#register").slideUp();
+				$("#login").fadeIn();
+			}
+			console.log(route);
+			console.log(route2);
+			if (route2 === "Register") {
+
+				$("#login").slideUp();
+				$("#register").fadeIn();
+			}
+			if (route2 === "Login") {
+
+				$("#register").slideUp();
+				$("#login").fadeIn();
+			}
+			
+
+		});
+
+	</script>
+
+}

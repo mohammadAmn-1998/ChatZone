@@ -1,0 +1,9 @@
+﻿@model ChatZone.WebUI.ViewModels.Users.LoginViewModel
+
+<form class="login-form" id="login" asp-controller="Auth" asp-action="Login">
+	<div asp-validation-summary="All" class="text-danger" style="  direction: rtl;"></div>
+	<input asp-for="UserName" id="loginUserName" type="text" placeholder="username"/>
+	<input asp-for="Password" id="loginPassword" type="password" placeholder="password"/>
+	<button>login</button>
+	<p class="message">Not registered? <a href="#register">Create an account</a></p>
+</form>
