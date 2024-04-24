@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 using ChatZone.ApplicationCore.Dtos.Users;
-using ChatZone.ApplicationCore.Helper;
+using ChatZone.ApplicationCore.Helpers;
 using ChatZone.ApplicationCore.Services.Interfaces;
 using ChatZone.WebUI.ViewModels.Users;
 using Microsoft.AspNetCore.Authentication;

@@ -1,16 +1,22 @@
-﻿using System;
+﻿using ChatZone.Domain.Entities.Chats;
+using ChatZone.Domain.Entities.Users;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ChatZone.Domain.Entities.Users;
-using ChatZone.Domain.SeedWork.Base;
+using ChatZone.ApplicationCore.Dtos.Chats;
 
-namespace ChatZone.Domain.Entities.Chats
+namespace ChatZone.ApplicationCore.Dtos.ChatGroups
 {
-	public class ChatGroup : BaseEntity
+	public class ChatGroupDto
 	{
+		public long Id { get; set; }
+
+		public DateTime CreatedDate { get; set; }
+
+		public bool IsDeleted { get; set; }
 
 		public string? Title { get; set; }
 
@@ -26,16 +32,11 @@ namespace ChatZone.Domain.Entities.Chats
 
 		public long ReceiverId { get; set; }
 
-		#region Relations
-
-		public List<Chat?>? Chats { get; set; }
-
-		[ForeignKey(nameof(OwnerId))]
-		public User? OwnerUser { get; set; }
+		public IEnumerable<ChatDto> Chats { get; set; }
 
 		public List<UserGroup>? UserGroups { get; set; }
 
-		#endregion
+		public User? OwnerUser { get; set; }
 
 	}
 }

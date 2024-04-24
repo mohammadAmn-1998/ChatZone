@@ -28,6 +28,7 @@ namespace ChatZone.ApplicationCore.Services.Implements
 					CreatedDate = DateTime.Now,
 					UserName = dto.UserName,
 					Password = dto.Password,
+					Avatar = "Default.jpg"
 				};
 
 				Insert(user);

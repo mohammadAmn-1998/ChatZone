@@ -16,6 +16,9 @@ namespace ChatZone.ApplicationCore.Services.Installer
 		{
 
 			services.AddScoped<IUserService, UserService>();
+			services.AddScoped<IChatGroupService, ChatGroupService>();
+			services.AddScoped<IUserGroupService, UserGroupService>();
+			services.AddScoped<IFileManagerService, FileManagerService>();
 
 		}
 

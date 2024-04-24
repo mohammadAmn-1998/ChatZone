@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace ChatZone.ApplicationCore.Helper
+namespace ChatZone.ApplicationCore.Helpers
 {
 	public static class Encoder
 	{

@@ -20,4 +20,8 @@
     <ProjectReference Include="..\ChatZone.Domain\ChatZone.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Dtos\Chats\" />
+  </ItemGroup>
+
 </Project>

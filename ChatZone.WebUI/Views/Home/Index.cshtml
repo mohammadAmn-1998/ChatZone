@@ -1,133 +1,171 @@
-﻿<div class="row">
-	<div class="col-8 chat-content">
-		<div class="header">
-			<img src="/assets/home_page/img/Default.jpg" />
-			<h2>علی</h2>
-		</div>
-		<div class="chats">
-			<div class="chat-me">
-				<div class="chat">
-					<p>سلام خوبی چه خبر ؟ </p>
-					<span>2020/06/05</span>
-				</div>
-			</div>
-			<div class="chat-you">
-				<div class="chat">
-					<p>سلام ممنون یه خبر خیلییی خوبی دارم برات</p>
-					<span>2020/06/05</span>
-				</div>
-			</div>
-			<div class="chat-me">
-				<div class="chat">
-					<p>چی ؟!!</p>
-					<span>2020/06/05</span>
-				</div>
-			</div>
-			<div class="chat-you">
-				<div class="chat">
-					<p>توی سایت codeYad دوره SignalR رایگان برگزار شده</p>
-					<span>2020/06/05</span>
-				</div>
-			</div>
-		</div>
-		<div class="footer">
-			<form>
-				<input type="text" class="form-control" placeholder="متن خود را وارد کنید">
-				<button class="btn btn-success">
-					ارسال
-					<i class="fa fa-send"></i>
-				</button>
-			</form>
-		</div>
+﻿
+<partial name="_CreateGroupModal"/>
+
+<div class="row">
+
+	<div class="col-8 chat-content" id="chat_content">
+		<partial name="_ChatContentPartial"/>
 	</div>
-	<div class="col-4 rooms">
-		<Ul>
-			<li>
-				<form>
-					<input type="text" placeholder="جستوجو کنید" class="form-control" />
-					<i class="fa fas fa-search"></i>
-				</form>
-			</li>
-			<li>
-				Global
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
-			</li>
-			<li class="active">
-				علی
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
 
-			</li>
-			<li>
-				رضا
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
-			</li>
-			<li>
-				Global
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
-			</li>
-			<li>
-				علی
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
+	<div class="col-4 rooms" id="user_groups">
 
-			</li>
-			<li>
-				رضا
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
-			</li>
-			<li>
-				Global
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
-			</li>
-			<li>
-				علی
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
-
-			</li>
-			<li>
-				رضا
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
-			</li>
-			<li>
-				Global
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
-			</li>
-			<li>
-				علی
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
-
-			</li>
-			<li>
-				رضا
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
-			</li>
-			<li>
-				Global
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
-			</li>
-			<li>
-				علی
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
-
-			</li>
-			<li>
-				رضا
-				<img src="/assets/home_page/img/Default.jpg" />
-				<span>17:20 1400/01/15 </span>
-			</li>
-		</Ul>
 	</div>
 </div>
+
+			@section scripts
+			{
+
+				<script>
+
+					$(document).ready(function() {
+
+						loadUSerGroups();
+
+					});
+
+					function createNewGroup(event) {
+
+						event.preventDefault();
+
+						var imageFile = event.target[1].files[0];
+						var groupTitle = event.target[0].value;
+
+
+						if (!groupTitle || groupTitle.trim() === "") {
+							alert("لطفا نام گروه را انتخاب کنید");
+							return false;
+						}
+
+
+						if (imageFile) {
+							const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.bmp)$/i;
+							if (!allowedExtensions.test(imageFile.name)) {
+								alert('نوع فایل نامعتبر است. فقط JPG، JPEG، PNG و BMP مجاز هستند.');
+								return false;
+							}
+						}
+
+						var formData = new FormData();
+						formData.append("title", groupTitle);
+						formData.append("imageFile", imageFile);
+						$.ajax({
+							url: "/Home/AddNewGroup",
+							type: "Post",
+							data: formData,
+							encyType: "multipart/form-data",
+							processData: false,
+							contentType: false
+
+						}).done(function(obj) {
+
+							console.log(obj);
+							if (obj) {
+								if (obj.message === "Error") {
+									alert("مشکلی پیش آمده! چند لحظه دیگر دوباره تلاش کنید");
+									return false;
+								}
+								if (obj.message === "Success") {
+									alert("گروه جدید ایجاد شد!");
+									$('.modal').toggle();
+									window.location.reload();
+									return true;
+								}
+							}
+
+
+							return false;
+
+						});
+
+						return false;
+					}
+
+
+					function loadUSerGroups() {
+
+						$.ajax({
+							url: "/Home/LoadUserGroupsList",
+							type: "get"
+
+						}).done(function(data) {
+
+							$("#user_groups").html(data);
+						});
+
+
+					}
+
+
+					function search() {
+
+						var title = $("#search_text").val().trim();
+
+
+						if (!title) {
+
+							loadUSerGroups();
+							return;
+
+						}
+
+						$.ajax({
+							url: `/Home/SearchUserGroups?title=${title}`,
+							type: "get"
+
+						}).done(function(data) {
+							console.log(data);
+							if (data.length <1) {
+
+								$("#search_ul").empty();
+								$("#search_ul").append(`
+								<div class="text-center">
+								<li>
+								Not Found!
+								</li>
+								</div>
+								`);
+								return;
+							}
+
+							$("#search_ul").empty();
+							data.forEach(function(obj) {
+
+								var lastChat = obj.lastChat;
+								if (lastChat) {
+									$("#search_ul").append(`
+
+												<li data-token=${obj.token}>
+										   ${obj.title}
+									<img src="/assets/home_page/img/group_img/${obj.imageName}" alt="Avatar" />
+									<span>${obj.lastChatDate}</span>
+									<br/>
+									<span>${obj.lastChat}</span>
+								</li>
+
+									`);
+								} else {
+									$("#search_ul").append(`
+
+														<li data-token=${obj.token}>
+												   ${obj.title}
+													<img src="/assets/home_page/img/group_img/${obj.imageName}" alt="Avatar" />
+										
+										</li>
+
+												`);
+
+
+								}
+
+
+							});
+
+
+						});
+
+
+					}
+
+				</script>
+
+			}

@@ -1,0 +1,42 @@
+﻿@using ChatZone.ApplicationCore.Helpers
+@model List<ChatZone.WebUI.ViewModels.UserGroups.UserGroupViewModel>?
+<Ul>
+	<li>
+		<form >
+			<input type="text" id="search_text" onkeyup="search()" placeholder="جستوجو کنید" class="form-control" />
+			<i class="fa fas fa-search"></i>
+		</form>
+				
+
+	</li>
+			
+	<li>
+		<button class="btn btn-success w-100 p-3 fa fa-plus rounded-3" type="button" class="btn btn-primary" data-toggle="modal" data-target="#createGroup_modal">
+			<b>ایجاد گروه جدید</b>
+		</button>
+	</li>
+		
+	<ul id="search_ul">
+		@if (Model != null && Model.Any())
+		{
+
+			@foreach (var userGroup in Model)
+			{
+				<li data-token="@userGroup.Token">
+					@userGroup.Title
+					<img src="@Directories.GetGroupImagePath(@userGroup.ImageName)" alt="Avatar" />
+					<span>@userGroup.LastChatDate </span>
+					<br/><span>@userGroup.LastChat</span>
+				</li>
+			}
+		}
+		else
+		{
+			<div class="text-center">
+				<b >NOT FOUND!
+				</b>
+			</div>
+				
+		}
+	</ul>
+</Ul>
