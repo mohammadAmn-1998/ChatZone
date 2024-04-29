@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ChatZone.ApplicationCore.Dtos.Chats;
 using ChatZone.ApplicationCore.Dtos.Users;
 using ChatZone.ApplicationCore.Services.Base;
 using ChatZone.ApplicationCore.Services.Interfaces;
@@ -77,6 +78,45 @@ namespace ChatZone.ApplicationCore.Services.Implements
 			{
 				throw new Exception(e.Message);
 			}
+			
+		}
+
+		public async Task<UserDto?> GetUserById(long id)
+		{
+
+			try
+			{
+				var user = await Table<User>().Include(u => u.Chats).ThenInclude(c => c.ChatGroup).FirstOrDefaultAsync(u => u.Id == id);
+
+				if (user is null)
+					return null;
+				return new UserDto
+				{
+					Id = user.Id,
+					UserName = user.UserName,
+					Password = null,
+					Avatar = user.Avatar,
+					Bio = user.Bio,
+					CreatedDate = user.CreatedDate,
+					IsDeleted = user.IsDeleted,
+					Chats = user.Chats?.OrderBy(c => c.CreatedDate).Select(c => new ChatDto
+					{
+						Id = c.Id,
+						CreateDate = c.CreatedDate,
+						ChatBody = c.ChatBody,
+						UserName = user.UserName,
+						GroupId = c.GroupId,
+						UserId = user.Id,
+						FileName = c.FileName,
+						GroupName = c.ChatGroup?.Title,
+					}).ToList()
+				};
+			}
+			catch (Exception e)
+			{
+				throw new Exception(e.Message);
+			}
+
 			
 		}
 	}

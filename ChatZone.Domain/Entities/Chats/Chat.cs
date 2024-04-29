@@ -26,7 +26,7 @@ namespace ChatZone.Domain.Entities.Chats
 
 		[ForeignKey(nameof(GroupId))]
 		public ChatGroup? ChatGroup { get; set; }
-
+		
 		[ForeignKey(nameof(UserId))]
 		public User? User { get; set; }
 

@@ -81,7 +81,7 @@ namespace ChatZone.ApplicationCore.Services.Implements
 							Token = u.ChatGroup.Token,
 							OwnerId = u.ChatGroup.OwnerId,
 							IsPrivate = u.ChatGroup.IsPrivate,
-							ReceiverId = u.ChatGroup.ReceiverId,
+							ReceiverId = u.ChatGroup.ReceiverId??0,
 							Chats = u.ChatGroup.Chats.Select(ch=> new ChatDto
 							{
 								Id = ch.Id,
@@ -130,9 +130,9 @@ namespace ChatZone.ApplicationCore.Services.Implements
 					IsUser = true,
 					Title = u.UserName,
 					GroupImage = u.Avatar,
-					Token = null,
-					LastChat = null,
-					LastChatDate = null
+					Token = u.Id.ToString(),
+					LastChat = u.Chats != null ? u.Chats.OrderByDescending(c => c.CreatedDate).First().ChatBody : null,
+					LastChatDate = u.Chats != null ? u.Chats.OrderBy(c => c.CreatedDate).First().CreatedDate : null,
 				}).ToListAsync();
 
 				result.AddRange(chatGroups);
@@ -145,6 +145,56 @@ namespace ChatZone.ApplicationCore.Services.Implements
 				throw new Exception(e.Message);
 			}
 
+			
+
+
+		}
+		
+
+		public async Task<List<GroupUserDto>?> GetGroupUsers(long groupId)
+		{
+
+			try
+			{
+
+				return await Table<UserGroup>().Where(g => g.GroupId == groupId).Select(g => new GroupUserDto
+				{
+					UserId = g.UserId
+				}).ToListAsync();
+
+
+			}
+			catch (Exception e)
+			{
+				throw new Exception(e.Message);
+			}
+		}
+
+		public async Task<bool> IsJoinedGroup(long groupId, long userId)
+		{
+			try
+			{
+				return await Table<UserGroup>().AnyAsync(ug => ug.GroupId == groupId && ug.UserId == userId);
+			}
+			catch (Exception e)
+			{
+				throw new Exception(e.Message);
+			}
+			
+		}
+
+		public async Task<bool> IsUserAlreadyJoinedToPrivateChat(long userId, long currentUserId)
+		{
+			try
+			{
+				return await Table<ChatGroup>().AnyAsync(c =>
+					c.OwnerId == userId && c.ReceiverId == currentUserId ||
+					c.OwnerId == currentUserId && c.ReceiverId == userId);
+			}
+			catch (Exception e)
+			{
+				throw new Exception(e.Message);
+			}
 			
 
 

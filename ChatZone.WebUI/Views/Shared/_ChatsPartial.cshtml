@@ -1,0 +1,86 @@
+﻿@using ChatZone.ApplicationCore.Helpers
+@model ChatZone.WebUI.ViewModels.ChatGroups.ChatGroupViewModel?
+
+@{
+
+	var isJoined = ViewBag.isJoined;
+
+}
+
+
+
+@if (Model != null)
+{
+	<div class="header">
+		<img src="@Directories.GetGroupImagePath(@Model.ImageName)" />
+		<h2>@Model.GroupTitle</h2>
+	</div>
+
+
+	<div class="chats">
+	
+		@if (Model.Chats is not null && Model.Chats.Any())
+		{
+
+			foreach (var chat in Model.Chats)
+			{
+
+				if (chat.IsCallerChat)
+				{
+					<div class="chat-me">
+						<div class="chat">
+							<i> شما : </i>
+							<p> @chat.ChatBody</p>
+							<span>@chat.CreateDate</span>
+						</div>
+					</div>
+				}
+				else
+				{
+					<div class="chat-you">
+						<div class="chat">
+							<i> @chat.UserName</i>
+							<p> @chat.ChatBody</p>
+							<span>@chat.CreateDate</span>
+						</div>
+					</div>
+				}
+
+			}
+
+
+		}@{
+			 if (Model.IsUser)
+			 {
+				 <div class="footer text-center">
+					 <a class="btn btn-success w-100" onclick="beginChatWithUser('@Model.UserId')">شروع چت</a>
+				 </div>
+			 }else if (Model.IsJoined)
+			 {
+				 <div class="footer">
+					 <form onsubmit="sendMessage(event)">
+						 <input type="hidden" id="group_id" value="@Model.GroupId"/>
+						 <input type="text" id="message_text" class="form-control" placeholder="متن خود را وارد کنید">
+						 <button type="submit" class="btn btn-success">
+							 ارسال
+							 <i class="fa fa-send"></i>
+						 </button>
+					 </form>
+				 </div>
+			 }
+			 else
+			 {
+				 <div class="footer text-center">
+					 <a class="btn btn-success w-100"  onclick="joinGroup('@Model.GroupId')">پیوستن به گروه</a>
+				 </div>
+			 }
+		 }
+		
+
+	
+	</div>
+
+}
+
+				
+				

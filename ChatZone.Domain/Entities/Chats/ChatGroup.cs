@@ -24,16 +24,21 @@ namespace ChatZone.Domain.Entities.Chats
 
 		public bool IsPrivate { get; set; }
 
-		public long ReceiverId { get; set; }
+		public long? ReceiverId { get; set; }
 
 		#region Relations
 
 		public List<Chat?>? Chats { get; set; }
-
+		
 		[ForeignKey(nameof(OwnerId))]
 		public User? OwnerUser { get; set; }
-
+		
+		[ForeignKey(nameof(ReceiverId))]
+		public User? ReceiverUser { get; set; }
+		
 		public List<UserGroup>? UserGroups { get; set; }
+
+		
 
 		#endregion
 

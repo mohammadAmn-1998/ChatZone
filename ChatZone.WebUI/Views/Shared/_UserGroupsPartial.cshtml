@@ -22,11 +22,13 @@
 
 			@foreach (var userGroup in Model)
 			{
-				<li data-token="@userGroup.Token">
+				<li data-token="@userGroup.Token" onclick="getGroupChats(event)">
 					@userGroup.Title
 					<img src="@Directories.GetGroupImagePath(@userGroup.ImageName)" alt="Avatar" />
-					<span>@userGroup.LastChatDate </span>
-					<br/><span>@userGroup.LastChat</span>
+					<div class="text-start">
+						<span>@userGroup.LastChat <br/>@userGroup.LastChatDate</span>
+					</div>
+					
 				</li>
 			}
 		}

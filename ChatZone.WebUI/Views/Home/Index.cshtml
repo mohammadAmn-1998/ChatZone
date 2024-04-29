@@ -4,7 +4,7 @@
 <div class="row">
 
 	<div class="col-8 chat-content" id="chat_content">
-		<partial name="_ChatContentPartial"/>
+		
 	</div>
 
 	<div class="col-4 rooms" id="user_groups">
@@ -15,13 +15,91 @@
 			@section scripts
 			{
 
+
+				<script>
+
+					var currentGroupId = 0;
+					var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+
+					connection.on("receiveChat", displayNewChat);
+
+					connection.on("receiveNotification", displayNotification);
+
+					connection.on("receiveChatGroup", displayChatGroup);
+
+					connection.start();
+
+
+					function displayNotification(data) {
+
+						var title = data.groupName;
+						var body = `${data.userName} :  \n ${data.chatBody}`;
+						if (currentGroupId !== data.groupId.toString()) {
+							var notification = new Notification(title,
+								{
+									body: body
+								});
+
+						}
+
+
+					}
+
+					function displayNewChat(data) {
+
+
+						if (!data)
+							return;
+
+						var chatBody = data.chatBody;
+						var createDate = data.createDate;
+						var userName = data.userName;
+						var userId = data.userId;
+						var userId = data.userId;
+						var isCallerChat = data.isCallerChat;
+						if (isCallerChat) {
+
+
+							$(".chats").append(`
+						<div class="chat-me">
+							<div class="chat">
+									<i> شما : </i>
+								<p> ${chatBody}</p>
+								<span>${createDate}</span>
+							</div>
+						</div>`);
+
+
+						} else {
+
+							$(".chats").append(`
+						<div class="chat-you">
+							<div class="chat">
+									<i>${userName}</i>
+								<p> ${chatBody}</p>
+								<span>${createDate}</span>
+							</div>
+						</div>`);
+						}
+
+
+					}
+				</script>
+				<script src="assets/home_page/js/signalr_custom.js"></script>
 				<script>
 
 					$(document).ready(function() {
 
 						loadUSerGroups();
+						if (Notification.permission !== "granted") {
+							Notification.requestPermission();
+						}
 
 					});
+				
+
+
+					
 
 					function createNewGroup(event) {
 
@@ -58,7 +136,6 @@
 
 						}).done(function(obj) {
 
-							console.log(obj);
 							if (obj) {
 								if (obj.message === "Error") {
 									alert("مشکلی پیش آمده! چند لحظه دیگر دوباره تلاش کنید");
@@ -96,6 +173,31 @@
 					}
 
 
+					function getGroupChats(event) {
+
+						let token = event.srcElement.attributes[0].value;
+						
+
+
+						if (!token)
+							return;
+
+						$.ajax({
+							url: "/Home/LoadGroupChats?token=" + token,
+							type: "get"
+
+						}).done(function(data) {
+
+							$("#chat_content").html(data);
+
+							currentGroupId = $("#group_id").val();
+							console.log("validating currentGroupId :");
+							console.log(currentGroupId);
+						});
+
+
+					}
+
 					function search() {
 
 						var title = $("#search_text").val().trim();
@@ -113,8 +215,8 @@
 							type: "get"
 
 						}).done(function(data) {
-							console.log(data);
-							if (data.length <1) {
+
+							if (data.length < 1) {
 
 								$("#search_ul").empty();
 								$("#search_ul").append(`
@@ -129,24 +231,27 @@
 
 							$("#search_ul").empty();
 							data.forEach(function(obj) {
+									var lastChat = obj.lastChat;
+									console.log(obj);
+								if (obj.isUser) {
+									if (lastChat) {
+										$("#search_ul").append(`
 
-								var lastChat = obj.lastChat;
-								if (lastChat) {
-									$("#search_ul").append(`
-
-												<li data-token=${obj.token}>
+												<li data-token="${obj.token}" onclick="getUserChats(event)">
 										   ${obj.title}
 									<img src="/assets/home_page/img/group_img/${obj.imageName}" alt="Avatar" />
-									<span>${obj.lastChatDate}</span>
-									<br/>
-									<span>${obj.lastChat}</span>
+									<div class="text-start">
+											<span>${obj.lastChat}
+											<br/>${obj.lastChatDate}
+										</span>
+												</div>
 								</li>
 
 									`);
-								} else {
-									$("#search_ul").append(`
+									} else {
+										$("#search_ul").append(`
 
-														<li data-token=${obj.token}>
+																<li data-token=${obj.token} onclick="getUserPrivateChats(event)">
 												   ${obj.title}
 													<img src="/assets/home_page/img/group_img/${obj.imageName}" alt="Avatar" />
 										
@@ -155,7 +260,40 @@
 												`);
 
 
+									}
+
+								} else {
+									
+									if (lastChat) {
+										$("#search_ul").append(`
+
+												<li data-token="${obj.token}" onclick="getGroupChats(event)">
+										   ${obj.title}
+									<img src="/assets/home_page/img/group_img/${obj.imageName}" alt="Avatar" />
+									<div class="text-start">
+											<span>${obj.lastChat}
+											<br/>${obj.lastChatDate}
+										</span>
+												</div>
+								</li>
+
+									`);
+									} else {
+										$("#search_ul").append(`
+
+																<li data-token=${obj.token} onclick="getGroupChats(event)">
+												   ${obj.title}
+													<img src="/assets/home_page/img/group_img/${obj.imageName}" alt="Avatar" />
+										
+										</li>
+
+												`);
+
+
+									}
 								}
+
+								
 
 
 							});
@@ -166,6 +304,73 @@
 
 					}
 
+
+		function getUserPrivateChats(event) {
+
+			let userId = event.srcElement.attributes[0].value;
+			console.log(userId);
+			$.ajax({
+				url: "/Home/GetUserPrivateChats?userId=" + userId,
+				type: "get"
+
+			}).done(function(data) {
+
+				$("#chat_content").html(data);
+
+
+			});
+
+
+		}
+
+
+					function joinGroup(groupId) {
+
+
+						if (!groupId)
+							return;
+
+						$.ajax({
+							url: "/Home/JoinGroup?groupId=" + groupId,
+							type: "get"
+
+						}).done(function(data) {
+
+							$("#chat_content").empty();
+							$("#chat_content").html(data);
+
+
+						});
+
+
+					}
+
+					function beginChatWithUser(userId) {
+
+
+						if (!userId) {
+							alert("مشکلی وجود دارد دوباره امتحان کنید");
+							return;
+						}
+
+						$.ajax({
+							url: "/Home/AddNewUserPrivateChatGroup?userId=" + userId,
+							type: "get"
+
+						}).done(function(data) {
+
+
+							$("#chat_content").html(data);
+
+						});
+
+					}
+
+		function displayChatGroup(data) {
+
+			console.log(data);
+
+		}
 				</script>
 
 			}

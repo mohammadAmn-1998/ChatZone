@@ -11,4 +11,6 @@ public interface IUserService
 
 	Task<bool> IsUserNameExists(string userName);
 
+	Task<UserDto?> GetUserById(long id);
+
 }

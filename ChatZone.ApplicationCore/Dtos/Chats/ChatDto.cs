@@ -11,9 +11,17 @@ public class ChatDto
 
 	public string? ChatBody { get; set; }
 
+	public string? UserName { get; set; }
+
 	public long GroupId { get; set; }
 
 	public long UserId { get; set; }
 
 	public string? FileName { get; set; }
+
+	public string? GroupName { get; set; }
+
+	
+
+	
 }

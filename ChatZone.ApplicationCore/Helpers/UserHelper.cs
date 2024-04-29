@@ -27,8 +27,12 @@ namespace ChatZone.ApplicationCore.Helpers
 			{
 				throw new Exception(e.Message);
 			}
-			
+
 		}
 
+		public static string? GetUserName(this ClaimsPrincipal? claims)
+		{
+			return claims?.FindFirst(ClaimTypes.Name)?.Value;
+		}
 	}
 }

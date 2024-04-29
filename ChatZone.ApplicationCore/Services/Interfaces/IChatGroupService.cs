@@ -11,5 +11,10 @@ namespace ChatZone.ApplicationCore.Services.Interfaces
 	{
 		Task<ChatGroupDto?> InsertNewChatGroup(ChatGroupDto dto);
 
+		Task<List<ChatGroupDto>?> GetChatGroupsBy(string title);
+
+		Task<ChatGroupDto?> GetChatGroupBy(long groupId);
+
+		Task<ChatGroupDto?> GetUserPrivateChatGroup(long userId, long currentUserId);
 	}
 }

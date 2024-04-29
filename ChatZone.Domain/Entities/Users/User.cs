@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,8 +24,12 @@ namespace ChatZone.Domain.Entities.Users
 
 		public List<Chat>? Chats { get; set; }
 
-		public List<ChatGroup>? ChatGroups { get; set; }
-
+		[InverseProperty("OwnerUser")]
+		public ICollection<ChatGroup>? OwnerChatGroups { get; set; }
+		
+		[InverseProperty("ReceiverUser")]
+		public ICollection<ChatGroup>? ReceiverChatGroups { get; set; }
+		
 		public List<UserGroup>? UserGroups { get; set; }
 
 		#endregion

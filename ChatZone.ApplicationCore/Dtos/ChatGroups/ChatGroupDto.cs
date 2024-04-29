@@ -32,7 +32,7 @@ namespace ChatZone.ApplicationCore.Dtos.ChatGroups
 
 		public long ReceiverId { get; set; }
 
-		public IEnumerable<ChatDto> Chats { get; set; }
+		public List<ChatDto>? Chats { get; set; }
 
 		public List<UserGroup>? UserGroups { get; set; }
 

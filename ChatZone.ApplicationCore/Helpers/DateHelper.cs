@@ -40,7 +40,8 @@ namespace ChatZone.ApplicationCore.Helpers
 			var monthLeft = Math.Abs(DateTime.Now.Month - time.Month);
 			var daysPast = Math.Abs(DateTime.Now.DayOfYear - time.DayOfYear);
 			var hoursLeft = Math.Abs(DateTime.Now.Hour - time.Hour);
-			var minutesLeft = Math.Abs(DateTime.Now.Minute - time.Minute);
+			var minutesLeft = (DateTime.Now.Minute < time.Minute) ? Math.Abs((60 + DateTime.Now.Minute) - time.Minute) : Math.Abs(DateTime.Now.Minute - time.Minute);
+			
 			var secondsLeft = Math.Abs(DateTime.Now.Second - time.Second);
 
 			if (yearsLeft != 0)
@@ -59,6 +60,11 @@ namespace ChatZone.ApplicationCore.Helpers
 			}
 			if (daysPast == 0 && hoursLeft != 0)
 			{
+				if (minutesLeft < 60)
+				{
+					return string.Format($"{minutesLeft} دقیقه پیش");
+				}
+
 				return string.Format($"{hoursLeft} ساعت پیش");
 			}
 

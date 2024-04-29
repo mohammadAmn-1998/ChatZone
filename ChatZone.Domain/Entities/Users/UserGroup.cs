@@ -15,7 +15,7 @@ public class UserGroup : BaseEntity
 
 	[ForeignKey(nameof(UserId))] 
 	public User? User { get; set; }
-
+	
 	[ForeignKey(nameof(GroupId))]
 	public ChatGroup? ChatGroup { get; set; }
 

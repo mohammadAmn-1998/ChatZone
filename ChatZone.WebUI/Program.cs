@@ -1,5 +1,6 @@
 using ChatZone.ApplicationCore.Services.Installer;
 using ChatZone.Domain.Context;
+using ChatZone.WebUI.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,8 @@ builder.Services.AddDbContext<ChatDbContext>(options =>
 {
 	options.UseSqlServer(builder.Configuration.GetConnectionString("default"));
 });
+
+builder.Services.AddSignalR();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -65,6 +68,7 @@ app.UseEndpoints(endpoints =>
 		name: "default",
 		pattern: "{controller=Home}/{action=Index}/{id?}");
 
+	endpoints.MapHub<ChatHub>("/chat");
 });
 
 
