@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ChatZone.ApplicationCore.Dtos.Chats;
+using ChatZone.ApplicationCore.Dtos.Users;
 
 namespace ChatZone.ApplicationCore.Dtos.ChatGroups
 {
@@ -30,13 +31,15 @@ namespace ChatZone.ApplicationCore.Dtos.ChatGroups
 
 		public bool IsPrivate { get; set; }
 
-		public long ReceiverId { get; set; }
+		public long? ReceiverId { get; set; }
 
 		public List<ChatDto>? Chats { get; set; }
 
 		public List<UserGroup>? UserGroups { get; set; }
 
-		public User? OwnerUser { get; set; }
+		public UserDto? OwnerUser { get; set; }
+		
+		public UserDto? ReceiverUser { get; set; }
 
 	}
 }

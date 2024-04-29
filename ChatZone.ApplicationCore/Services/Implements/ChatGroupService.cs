@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ChatZone.ApplicationCore.Dtos.ChatGroups;
 using ChatZone.ApplicationCore.Dtos.Chats;
+using ChatZone.ApplicationCore.Dtos.Users;
 using ChatZone.ApplicationCore.Services.Base;
 using ChatZone.ApplicationCore.Services.Interfaces;
 using ChatZone.Domain.Context;
@@ -20,7 +21,7 @@ namespace ChatZone.ApplicationCore.Services.Implements
 		{
 		}
 
-		public async Task<ChatGroupDto?> InsertNewChatGroup(ChatGroupDto dto)
+		public async Task<ChatGroupDto> InsertNewChatGroup(ChatGroupDto dto)
 		{
 
 			try
@@ -35,7 +36,7 @@ namespace ChatZone.ApplicationCore.Services.Implements
 					Token = Guid.NewGuid().ToString(),
 					OwnerId = dto.OwnerId,
 					IsPrivate = dto.IsPrivate,
-					ReceiverId = dto.ReceiverId,
+					ReceiverId = dto.ReceiverId ,
 
 				};
 
@@ -134,7 +135,7 @@ namespace ChatZone.ApplicationCore.Services.Implements
 		{
 			try
 			{
-				var result = await Table<ChatGroup>().Include(c=> c.Chats).Include(c=> c.OwnerUser).SingleAsync(c =>
+				var result = await Table<ChatGroup>().Include(c=> c.Chats).Include(c=> c.OwnerUser).Include(c=> c.ReceiverUser).SingleAsync(c =>
 					(c.OwnerId == userId && c.ReceiverId == currentUserId) ||
 					(c.OwnerId == currentUserId && c.ReceiverId == userId));
 
@@ -161,7 +162,16 @@ namespace ChatZone.ApplicationCore.Services.Implements
 						FileName = chat.FileName,
 						GroupName = chat.ChatGroup?.Title
 					}).ToList(),
-					OwnerUser = result.OwnerUser
+					 OwnerUser = new UserDto
+					{
+						Id = result.OwnerUser!.Id,
+						UserName = result.OwnerUser!.UserName,
+						Password = result.OwnerUser!.Password,
+						Avatar = result.OwnerUser!.Avatar,
+						Bio = result.OwnerUser!.Bio,
+						CreatedDate = result.OwnerUser!.CreatedDate,
+						IsDeleted = result.OwnerUser!.IsDeleted,
+					},
 				};
 			}
 			catch (Exception e)

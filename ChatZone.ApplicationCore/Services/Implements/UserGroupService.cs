@@ -54,21 +54,12 @@ namespace ChatZone.ApplicationCore.Services.Implements
 
 			try
 			{
-				return await Table<UserGroup>().Where(u => u.UserId == userId).Include(u => u.ChatGroup).ThenInclude(u => u!.Chats)
+				return await Table<UserGroup>().Where(u => u.UserId == userId && (!u.ChatGroup!.IsPrivate || u.ChatGroup!.OwnerId == userId || u.ChatGroup.ReceiverId == userId)).Include(ug=> ug.ChatGroup).Include(ug=> ug.ChatGroup!.OwnerUser).Include(ug=> ug.ChatGroup!.ReceiverUser).Include(ug=> ug.ChatGroup!.Chats)
 					.Select(u => new UserGroupDto()
 					{
 						Id = u.Id,
 						GroupId = u.GroupId,
-						User = new UserDto
-						{
-							Id = u.User.Id,
-							UserName = u.User.UserName,
-							Password = u.User.Password,
-							Avatar = u.User.Avatar,
-							Bio = u.User.Bio,
-							CreatedDate = u.User.CreatedDate,
-							IsDeleted = u.User.IsDeleted,
-						},
+						
 						UserId = userId,
 						ChatGroup = new ChatGroupDto
 						{
@@ -82,7 +73,7 @@ namespace ChatZone.ApplicationCore.Services.Implements
 							OwnerId = u.ChatGroup.OwnerId,
 							IsPrivate = u.ChatGroup.IsPrivate,
 							ReceiverId = u.ChatGroup.ReceiverId??0,
-							Chats = u.ChatGroup.Chats.Select(ch=> new ChatDto
+							Chats = u.ChatGroup!.Chats.Select(ch=> new ChatDto
 							{
 								Id = ch.Id,
 								CreateDate = ch.CreatedDate,
@@ -90,10 +81,31 @@ namespace ChatZone.ApplicationCore.Services.Implements
 								GroupId = ch.GroupId,
 								UserId = ch.UserId,
 								FileName = ch.FileName
-							}).ToList()?? null
-							
+							}).ToList()?? null,
+							OwnerUser = new UserDto
+							{
+								Id = u.ChatGroup.OwnerUser!.Id,
+								UserName = u.ChatGroup.OwnerUser!.UserName,
+								Password = u.ChatGroup.OwnerUser!.Password,
+								Avatar = u.ChatGroup.OwnerUser!.Avatar,
+								Bio = u.ChatGroup.OwnerUser!.Bio,
+								CreatedDate = u.ChatGroup.OwnerUser!.CreatedDate,
+								IsDeleted = u.ChatGroup.OwnerUser!.IsDeleted,
+							},
+							ReceiverUser = u.ChatGroup.ReceiverUser !=null ?   new UserDto
+							{
+								Id = u.ChatGroup.ReceiverUser.Id ,
+								UserName = u.ChatGroup.ReceiverUser!.UserName,
+								Password = u.ChatGroup.ReceiverUser!.Password,
+								Avatar = u.ChatGroup.ReceiverUser!.Avatar,
+								Bio = u.ChatGroup.ReceiverUser!.Bio,
+								CreatedDate = u.ChatGroup.ReceiverUser!.CreatedDate,
+								IsDeleted = u.ChatGroup.ReceiverUser!.IsDeleted,
+							} : null
+
 						},
-						CreateDate = u.CreatedDate
+						CreateDate = u.CreatedDate,
+						
 					}).ToListAsync();
 			}
 			catch (Exception e)

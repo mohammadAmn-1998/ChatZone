@@ -84,6 +84,12 @@
 
 
 					}
+
+		function displayChatGroup(data) {
+
+			console.log(data);
+
+		}
 				</script>
 				<script src="assets/home_page/js/signalr_custom.js"></script>
 				<script>
@@ -267,7 +273,7 @@
 									if (lastChat) {
 										$("#search_ul").append(`
 
-												<li data-token="${obj.token}" onclick="getGroupChats(event)">
+														<li data-token="${obj.token}" onclick="getUserPrivateChats(event)">
 										   ${obj.title}
 									<img src="/assets/home_page/img/group_img/${obj.imageName}" alt="Avatar" />
 									<div class="text-start">
@@ -310,7 +316,7 @@
 			let userId = event.srcElement.attributes[0].value;
 			console.log(userId);
 			$.ajax({
-				url: "/Home/GetUserPrivateChats?userId=" + userId,
+				url: "/Home/GetUserChats?userId=" + userId,
 				type: "get"
 
 			}).done(function(data) {
@@ -366,11 +372,8 @@
 
 					}
 
-		function displayChatGroup(data) {
+					
 
-			console.log(data);
-
-		}
 				</script>
 
 			}

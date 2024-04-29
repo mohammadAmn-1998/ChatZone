@@ -20,6 +20,7 @@ namespace ChatZone.WebUI.Controllers
 	{
 
 		#region injected services ctor
+
 		IHubContext<ChatHub> _hubContext;
 		IUserGroupService _UserGroupService;
 		IChatGroupService _ChatGroupService;
@@ -27,7 +28,9 @@ namespace ChatZone.WebUI.Controllers
 		private IChatService _chatService;
 		IUserService _userService;
 
-		public HomeController(IUserGroupService userGroupService, IChatGroupService chatGroupService, IFileManagerService fileManagerService, IChatService chatService, IUserService userService, IHubContext<ChatHub> hubContext)
+		public HomeController(IUserGroupService userGroupService, IChatGroupService chatGroupService,
+			IFileManagerService fileManagerService, IChatService chatService, IUserService userService,
+			IHubContext<ChatHub> hubContext)
 		{
 			_UserGroupService = userGroupService;
 			_ChatGroupService = chatGroupService;
@@ -47,11 +50,12 @@ namespace ChatZone.WebUI.Controllers
 			return View();
 		}
 
-		public async Task<IActionResult> AddNewGroup([FromForm]CreateChatGroupViewModel model)
+		[HttpPost]
+		public async Task<IActionResult> AddNewGroup([FromForm] CreateChatGroupViewModel model)
 		{
 
 			if (!ModelState.IsValid)
-				return new ObjectResult(new{message="Error"});
+				return new ObjectResult(new { message = "Error" });
 
 
 			var imageName =
@@ -60,7 +64,6 @@ namespace ChatZone.WebUI.Controllers
 			var chatGroupDto = new ChatGroupDto
 			{
 				Title = model.Title,
-				Description = null,
 				GroupImage = imageName,
 				OwnerId = HttpContext.User.GetUserId(),
 			};
@@ -97,13 +100,17 @@ namespace ChatZone.WebUI.Controllers
 					.ConvertToPersianDate()
 			}).ToList();
 
-			return PartialView("_UserGroupsPartial", model);
+			var fixedModel = FixPrivateUserGroupList(userGroupsList);
+
+
+
+			return PartialView("_UserGroupsPartial", fixedModel);
 		}
 
 		public async Task<IActionResult> SearchUserGroups(string title)
 		{
 
-			var searchResults = await _UserGroupService.SearchBy( title);
+			var searchResults = await _UserGroupService.SearchBy(title);
 
 
 			var model = searchResults?.Select(sr => new UserGroupViewModel
@@ -114,7 +121,7 @@ namespace ChatZone.WebUI.Controllers
 				LastChat = sr.LastChat ?? "",
 				Token = sr.Token,
 				LastChatDate = sr.LastChatDate?.ConvertToPersianDate() ?? ""
-			}).Where(u=> u.Title != HttpContext.User.GetUserName()).ToList();
+			}).Where(u => u.Title != HttpContext.User.GetUserName()).ToList();
 
 			return new ObjectResult(model);
 
@@ -135,7 +142,7 @@ namespace ChatZone.WebUI.Controllers
 
 			var model = new ChatGroupViewModel
 			{
-				
+
 				GroupId = chatsDto.GroupId,
 				GroupTitle = chatsDto?.GroupTitle,
 				ImageName = chatsDto?.ImageName,
@@ -143,7 +150,7 @@ namespace ChatZone.WebUI.Controllers
 				IsJoined = isJoined,
 				Chats = chatsDto?.Chats?.Select(c => new ChatViewModel
 				{
-					
+
 					ChatBody = c.ChatBody,
 					GroupId = c.GroupId,
 					UserName = c.UserName,
@@ -213,58 +220,221 @@ namespace ChatZone.WebUI.Controllers
 		{
 
 			var user = await _userService.GetUserById(userId);
-			if (user == null) return Empty;
+			if (user == null) return NotFound();
 
 			var result = await _ChatGroupService.GetUserPrivateChatGroup(userId, HttpContext.User.GetUserId());
 
 
-
+			//if result is null it means this user had never chat with you and need to create a new private chatGroup for current user and this user
+			ChatGroupViewModel model;
 			if (result is not null)
 			{
-
-				var model = new ChatGroupViewModel
+				 model = FixPrivateChatGroup(result, user.Id);
+			}
+			else
+			{
+				 model = new ChatGroupViewModel
 				{
+					GroupId = 0,
+					IsUser = true,
+					UserId = userId,
+					GroupTitle = user.UserName,
+					ImageName = user.Avatar,
+					CreateDate = DateTime.Now.ConvertToPersianDate(),
+					IsJoined = false,
 
-					GroupId = result.Id,
-					GroupTitle = result?.Title,
-					ImageName = result?.GroupImage,
-					CreateDate = result?.CreatedDate.ConvertToPersianDate(),
-					Chats = result?.Chats?.Select(c => new ChatViewModel
-					{
-
-						ChatBody = c.ChatBody,
-						GroupId = c.GroupId,
-						UserName = c.UserName,
-						CreateDate = c.CreateDate.ConvertToPersianDate(),
-						UserId = c.UserId,
-						FileName = c.FileName,
-						IsCallerChat = c.UserId == HttpContext.User.GetUserId()
-						
-					}).ToList()
 				};
-
-
-
-				return PartialView("_ChatsPartial", model);
-
-
 			}
 
-			return NotFound();
+			return PartialView("_ChatsPartial", model);
 		}
 
 		public async Task<IActionResult> AddNewUserPrivateChatGroup(long userId)
 		{
 
+			if (userId == 0) return BadRequest();
 
+			var user = await _userService.GetUserById(userId);
+			if (user is null) return NotFound();
 
-			return null;
+			var chatGroupDto = new ChatGroupDto
+			{
+				Title = user.UserName,
+				GroupImage = user.Avatar,
+				OwnerId = HttpContext.User.GetUserId(),
+				IsPrivate = true,
+				ReceiverId = user.Id,
+			};
 
+			//add new PrivateChatGroup:
+			var result = await _ChatGroupService.InsertNewChatGroup(chatGroupDto);
 
+			//join each of users to this private chat group:
+			await _UserGroupService.AddNewUserGroup(new UserGroupDto
+			{
+				UserId = result.OwnerId,
+				GroupId = result.Id,
+			});
+			await _UserGroupService.AddNewUserGroup(new UserGroupDto
+			{
+				UserId = result.ReceiverId ?? 0,
+				GroupId = result.Id,
+			});
+
+			var model = FixPrivateChatGroup(result, userId);
+
+			return PartialView("_ChatsPartial", model);
 
 		}
 
-			
-		
+
+		#region private helper Methods
+
+		private ChatGroupViewModel FixPrivateChatGroup(ChatGroupDto dto,long userId)
+		{
+
+
+			try
+			{
+				if (dto.OwnerId == HttpContext.User.GetUserId() && dto.ReceiverId == userId)
+				{
+
+					return new ChatGroupViewModel
+					{
+
+						GroupId = dto.Id,
+						GroupTitle = dto?.Title,
+						ImageName = dto?.GroupImage,
+						CreateDate = dto?.CreatedDate.ConvertToPersianDate(),
+						IsJoined =  _UserGroupService.IsJoinedGroup(dto!.Id,HttpContext.User.GetUserId()).Result,
+						Chats = dto?.Chats?.Select(c => new ChatViewModel
+						{
+
+							ChatBody = c.ChatBody,
+							GroupId = c.GroupId,
+							UserName = c.UserName,
+							CreateDate = c.CreateDate.ConvertToPersianDate(),
+							UserId = c.UserId,
+							FileName = c.FileName,
+							IsCallerChat = c.UserId == HttpContext.User.GetUserId()
+
+						}).ToList()
+					};
+
+				}
+				else if (dto.ReceiverId == HttpContext.User.GetUserId() && dto.OwnerId == userId)
+
+				{
+
+					return new ChatGroupViewModel
+					{
+
+						GroupId = dto.Id,
+						GroupTitle = dto?.OwnerUser!.UserName,
+						ImageName = dto?.OwnerUser!.Avatar,
+						CreateDate = dto?.CreatedDate.ConvertToPersianDate(),
+						IsJoined = _UserGroupService.IsJoinedGroup(dto!.Id, HttpContext.User.GetUserId()).Result,
+						Chats = dto?.Chats?.Select(c => new ChatViewModel
+						{
+
+							ChatBody = c.ChatBody,
+							GroupId = c.GroupId,
+							UserName = c.UserName,
+							CreateDate = c.CreateDate.ConvertToPersianDate(),
+							UserId = c.UserId,
+							FileName = c.FileName,
+							IsCallerChat = c.UserId == HttpContext.User.GetUserId()
+
+						}).ToList()
+					};
+				}
+				else
+				{
+					return null;
+				}
+			}
+			catch (Exception e)
+			{
+				throw new Exception(e.Message);
+			}
+
+		}
+
+		private List<UserGroupViewModel>? FixPrivateUserGroupList(List<UserGroupDto>? groupLists)
+		{
+			List<UserGroupViewModel> model = new List<UserGroupViewModel>();
+			if (groupLists == null)
+				return null;
+			foreach (var groupDto in groupLists)
+			{
+
+				
+
+				var receiverId = groupDto?.ChatGroup!.ReceiverId;
+				if (receiverId is not null or 0)
+				{
+					if (receiverId == HttpContext.User.GetUserId())
+					{
+
+						//it means owner is the other user so group image and title is receiver avatar and userName so we need to change group image and title to owner because we are in receiver account.
+
+						model.Add(
+							new UserGroupViewModel
+							{
+								Title = groupDto!.ChatGroup!.OwnerUser!.UserName,
+								ImageName = groupDto.ChatGroup?.OwnerUser!.Avatar,
+								Token = groupDto.ChatGroup?.Token,
+								LastChat = groupDto.ChatGroup?.Chats?.OrderBy(c => c.CreateDate)
+									.LastOrDefault()?.ChatBody,
+								LastChatDate = groupDto.ChatGroup?.Chats?.OrderBy(c => c.CreateDate)
+									.LastOrDefault()?.CreateDate
+									.ConvertToPersianDate()
+							});
+
+
+					}
+					else
+					{
+						model.Add(
+							new UserGroupViewModel
+							{
+								Title = groupDto!.ChatGroup!.Title,
+								ImageName = groupDto.ChatGroup?.GroupImage,
+								Token = groupDto.ChatGroup?.Token,
+								LastChat = groupDto.ChatGroup?.Chats?.OrderBy(c => c.CreateDate)
+									.LastOrDefault()?.ChatBody,
+								LastChatDate = groupDto.ChatGroup?.Chats?.OrderBy(c => c.CreateDate)
+									.LastOrDefault()?.CreateDate
+									.ConvertToPersianDate()
+							});
+					}
+
+				}
+				else
+				{
+					model.Add(
+						new UserGroupViewModel
+						{
+							Title = groupDto!.ChatGroup!.Title,
+							ImageName = groupDto.ChatGroup?.GroupImage,
+							Token = groupDto.ChatGroup?.Token,
+							LastChat = groupDto.ChatGroup?.Chats?.OrderBy(c => c.CreateDate)
+								.LastOrDefault()?.ChatBody,
+							LastChatDate = groupDto.ChatGroup?.Chats?.OrderBy(c => c.CreateDate)
+								.LastOrDefault()?.CreateDate
+								.ConvertToPersianDate()
+						});
+				}
+
+			}
+
+			return model ;
+
+		}
+
+		#endregion
+
+
+
 	}
 }

@@ -9,7 +9,7 @@ namespace ChatZone.ApplicationCore.Services.Interfaces
 {
 	public  interface IChatGroupService
 	{
-		Task<ChatGroupDto?> InsertNewChatGroup(ChatGroupDto dto);
+		Task<ChatGroupDto> InsertNewChatGroup(ChatGroupDto dto);
 
 		Task<List<ChatGroupDto>?> GetChatGroupsBy(string title);
 
