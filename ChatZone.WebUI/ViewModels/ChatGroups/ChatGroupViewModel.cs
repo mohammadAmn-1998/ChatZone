@@ -18,6 +18,10 @@ namespace ChatZone.WebUI.ViewModels.ChatGroups
 
 		public bool IsJoined { get; set; }
 
+		public long OwnerId { get; set; }
+
+		public long ReceiverId { get; set; }
+
 		public List<ChatViewModel>? Chats { get; set; }
 	}
 }

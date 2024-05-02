@@ -7,5 +7,7 @@
 
 		public IFormFile? ImageFile { get; set; }
 
+		public bool IsPrivate { get; set; }
+
 	}
 }

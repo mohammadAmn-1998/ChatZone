@@ -1,8 +1,17 @@
 ﻿
 <partial name="_CreateGroupModal"/>
+<div class="disConnect ">
 
+	<div class="loading"style="width: 10%; height: 10%; border-radius: 100%;">
+		
+	</div><div id="loading-text">
+		ارتباط قطع شد...<br />
+		...در حال ارتباط گیری مجدد
+	</div>
+
+</div>
 <div class="row">
-
+	
 	<div class="col-8 chat-content" id="chat_content">
 		
 	</div>
@@ -18,6 +27,7 @@
 
 				<script>
 
+
 					var currentGroupId = 0;
 					var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 
@@ -27,8 +37,23 @@
 
 					connection.on("receiveChatGroup", displayChatGroup);
 
-					connection.start();
+					function start() {
 
+						try {
+							connection.start();
+							console.log("start");
+							$(".disConnect").hide();
+						} catch (e) {
+
+							$(".disConnect").show();
+							setTimeout(start, 3000);
+
+						}
+
+					}
+
+					connection.onclose(start);
+					start();
 
 					function displayNotification(data) {
 
@@ -85,11 +110,11 @@
 
 					}
 
-		function displayChatGroup(data) {
+					function displayChatGroup(data) {
 
-			console.log(data);
+						console.log(data);
 
-		}
+					}
 				</script>
 				<script src="assets/home_page/js/signalr_custom.js"></script>
 				<script>
@@ -99,13 +124,12 @@
 						loadUSerGroups();
 						if (Notification.permission !== "granted") {
 							Notification.requestPermission();
+
 						}
 
+
 					});
-				
 
-
-					
 
 					function createNewGroup(event) {
 
@@ -113,6 +137,7 @@
 
 						var imageFile = event.target[1].files[0];
 						var groupTitle = event.target[0].value;
+						var isPrivate = event.target[2].checked;
 
 
 						if (!groupTitle || groupTitle.trim() === "") {
@@ -132,6 +157,7 @@
 						var formData = new FormData();
 						formData.append("title", groupTitle);
 						formData.append("imageFile", imageFile);
+						formData.append("isPrivate", isPrivate);
 						$.ajax({
 							url: "/Home/AddNewGroup",
 							type: "Post",
@@ -182,7 +208,6 @@
 					function getGroupChats(event) {
 
 						let token = event.srcElement.attributes[0].value;
-						
 
 
 						if (!token)
@@ -237,8 +262,8 @@
 
 							$("#search_ul").empty();
 							data.forEach(function(obj) {
-									var lastChat = obj.lastChat;
-									console.log(obj);
+								var lastChat = obj.lastChat;
+								console.log(obj);
 								if (obj.isUser) {
 									if (lastChat) {
 										$("#search_ul").append(`
@@ -257,7 +282,7 @@
 									} else {
 										$("#search_ul").append(`
 
-																<li data-token=${obj.token} onclick="getUserPrivateChats(event)">
+																		<li data-token=${obj.token} onclick="getGroupChats(event)">
 												   ${obj.title}
 													<img src="/assets/home_page/img/group_img/${obj.imageName}" alt="Avatar" />
 										
@@ -269,11 +294,11 @@
 									}
 
 								} else {
-									
+
 									if (lastChat) {
 										$("#search_ul").append(`
 
-														<li data-token="${obj.token}" onclick="getUserPrivateChats(event)">
+																<li data-token="${obj.token}" onclick="getGroupChats(event)">
 										   ${obj.title}
 									<img src="/assets/home_page/img/group_img/${obj.imageName}" alt="Avatar" />
 									<div class="text-start">
@@ -299,8 +324,6 @@
 									}
 								}
 
-								
-
 
 							});
 
@@ -310,24 +333,93 @@
 
 					}
 
-
-		function getUserPrivateChats(event) {
-
-			let userId = event.srcElement.attributes[0].value;
-			console.log(userId);
-			$.ajax({
-				url: "/Home/GetUserChats?userId=" + userId,
-				type: "get"
-
-			}).done(function(data) {
-
-				$("#chat_content").html(data);
+					function searchUsers() {
 
 
-			});
+						var searchText = $("#search_userName_text").val().trim();
+
+						if (!searchText)
+							return;
+
+						$.ajax({
+							url: `/Home/SearchUsers?userName=${searchText}&currentGroupId=${currentGroupId}`,
+							type: "get"
 
 
-		}
+						}).done(function(data) {
+
+							$("#users_list").empty();
+							console.log(data);
+							data.forEach(user => {
+								if (user.isMember) {
+									$("#users_list").append(`
+
+					<li data-id="${user.id}">
+
+							<div class="p-2 w-100">${user.userName}<span>(عضو)</span>
+					</div>
+							
+
+					</li>
+
+					`);
+								} else {
+
+									$("#users_list").append(`
+
+											<li class="btn btn-info  w-100" data-id="${user.id}" onclick="addMember(event)">
+
+									${user.userName} (افزودن به گروه)  
+						
+									
+
+							</li>
+
+							`);
+
+								}
+							});
+
+						});
+
+					}
+
+					function addMember(event) {
+						var userId = event.target.getAttribute('data-id');
+						console.log(event);
+
+						if (!userId)
+							return;
+
+						$.ajax({
+							url: `/Home/AddMemberToGroup?groupId=${currentGroupId}&userId=${userId}`,
+							type: "get"
+
+						}).done(function(data) {
+
+							console.log(data);
+
+						});
+
+					}
+
+					function getUserPrivateChats(event) {
+
+						let userId = event.srcElement.attributes[0].value;
+						console.log(userId);
+						$.ajax({
+							url: "/Home/GetUserChats?userId=" + userId,
+							type: "get"
+
+						}).done(function(data) {
+
+							$("#chat_content").html(data);
+
+
+						});
+
+
+					}
 
 
 					function joinGroup(groupId) {
@@ -372,7 +464,6 @@
 
 					}
 
-					
 
 				</script>
 

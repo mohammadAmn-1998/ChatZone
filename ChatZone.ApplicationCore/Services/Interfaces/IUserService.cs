@@ -13,4 +13,5 @@ public interface IUserService
 
 	Task<UserDto?> GetUserById(long id);
 
+	Task<List<SearchUserDto>?> SearchBy(string userName,long currentGroupId);
 }

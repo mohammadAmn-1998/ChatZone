@@ -4,16 +4,23 @@
 @{
 
 	var isJoined = ViewBag.isJoined;
+	var userId = Context.User.GetUserId();
 
 }
 
-
-
+<partial name="_AddMemberModal" />
 @if (Model != null)
 {
 	<div class="header">
 		<img src="@Directories.GetGroupImagePath(@Model.ImageName)" />
 		<h2>@Model.GroupTitle</h2>
+		<div class="text-end">
+			@if (Model.ReceiverId ==0 && userId == Model.OwnerId)
+			{
+				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#add_member_modal">اضافه کردن عضو جدید</button>
+			}
+		</div>
+		
 	</div>
 
 

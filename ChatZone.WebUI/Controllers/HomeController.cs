@@ -8,6 +8,7 @@ using ChatZone.WebUI.Hubs;
 using ChatZone.WebUI.ViewModels.ChatGroups;
 using ChatZone.WebUI.ViewModels.Chats;
 using ChatZone.WebUI.ViewModels.UserGroups;
+using ChatZone.WebUI.ViewModels.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -16,7 +17,7 @@ using Newtonsoft.Json.Linq;
 namespace ChatZone.WebUI.Controllers
 {
 	[Authorize]
-	public class HomeController : Controller
+	public class HomeController : BaseController
 	{
 
 		#region injected services ctor
@@ -57,14 +58,19 @@ namespace ChatZone.WebUI.Controllers
 			if (!ModelState.IsValid)
 				return new ObjectResult(new { message = "Error" });
 
+			var imageName = "Default.jpg";
 
-			var imageName =
-				await _fileManagerService.UploadFileAndReturnFileName(model.ImageFile!,
+			if(model.ImageFile is not null)
+					 imageName =
+					await _fileManagerService.UploadFileAndReturnFileName(model.ImageFile!,
 					Directories.GetUserGroupImageDirectory());
+
+
 			var chatGroupDto = new ChatGroupDto
 			{
 				Title = model.Title,
 				GroupImage = imageName,
+				IsPrivate = model.IsPrivate,
 				OwnerId = HttpContext.User.GetUserId(),
 			};
 
@@ -79,7 +85,7 @@ namespace ChatZone.WebUI.Controllers
 				GroupId = result.Id,
 			};
 
-			await _UserGroupService.AddNewUserGroup(userGroupDto);
+			await _UserGroupService.JoinToGroup(userGroupDto);
 			return new ObjectResult(new { message = "Success" });
 
 		}
@@ -146,6 +152,8 @@ namespace ChatZone.WebUI.Controllers
 				GroupId = chatsDto.GroupId,
 				GroupTitle = chatsDto?.GroupTitle,
 				ImageName = chatsDto?.ImageName,
+				OwnerId = chatsDto?.OwnerId ??0,
+				ReceiverId = chatsDto?.ReceiverId ??0 ,
 				CreateDate = chatsDto?.CreateDate?.ConvertToPersianDate(),
 				IsJoined = isJoined,
 				Chats = chatsDto?.Chats?.Select(c => new ChatViewModel
@@ -175,7 +183,7 @@ namespace ChatZone.WebUI.Controllers
 			if (groupId <= 0)
 				return NotFound();
 
-			await _UserGroupService.AddNewUserGroup(new UserGroupDto
+			await _UserGroupService.JoinToGroup(new UserGroupDto
 			{
 				UserId = HttpContext.User.GetUserId(),
 				GroupId = groupId,
@@ -270,12 +278,12 @@ namespace ChatZone.WebUI.Controllers
 			var result = await _ChatGroupService.InsertNewChatGroup(chatGroupDto);
 
 			//join each of users to this private chat group:
-			await _UserGroupService.AddNewUserGroup(new UserGroupDto
+			await _UserGroupService.JoinToGroup(new UserGroupDto
 			{
 				UserId = result.OwnerId,
 				GroupId = result.Id,
 			});
-			await _UserGroupService.AddNewUserGroup(new UserGroupDto
+			await _UserGroupService.JoinToGroup(new UserGroupDto
 			{
 				UserId = result.ReceiverId ?? 0,
 				GroupId = result.Id,
@@ -285,6 +293,38 @@ namespace ChatZone.WebUI.Controllers
 
 			return PartialView("_ChatsPartial", model);
 
+		}
+
+		public async Task<IActionResult> SearchUsers(string userName,long currentGroupId)
+		{
+
+			var usersList = await _userService.SearchBy(userName,currentGroupId);
+
+			var fixedModel = usersList?.Where(u => u.UserName != HttpContext.User.GetUserName()).Select(u =>
+				new SearchUserViewModel
+				{
+					Id = u.Id,
+					UserName = u.UserName,
+					IsMember = u.IsMember
+
+				}).ToList();
+			return new ObjectResult(fixedModel);
+			
+		}
+
+		public async Task<IActionResult> AddMemberToGroup(long groupId, long userId)
+		{
+
+		   await _UserGroupService.JoinToGroup(new UserGroupDto
+			{
+				UserId = userId,
+				GroupId = groupId,
+				
+			});
+			SuccessAlert("کاربر به گروه اضافه شد!");
+			var user = await _userService.GetUserById(userId);
+			
+			return new ObjectResult(new {Status="success",UserId = userId,GroupId = groupId,UserName= user!.UserName});
 		}
 
 
@@ -433,8 +473,6 @@ namespace ChatZone.WebUI.Controllers
 		}
 
 		#endregion
-
-
 
 	}
 }

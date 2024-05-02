@@ -33,8 +33,10 @@ namespace ChatZone.ApplicationCore.Services.Implements
 				var dto = new GroupChatsDto
 				{
 					GroupId = result.Id,
+					OwnerId = result.OwnerId,
 					GroupTitle = result.Title,
 					ImageName = result.GroupImage,
+					ReceiverId = result.ReceiverId ??0,
 					CreateDate = result.CreatedDate,
 					Chats = result.Chats?.OrderBy(c => c.CreatedDate).Select(c => new ChatDto
 					{

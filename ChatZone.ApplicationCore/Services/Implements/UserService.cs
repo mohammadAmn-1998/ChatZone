@@ -119,5 +119,24 @@ namespace ChatZone.ApplicationCore.Services.Implements
 
 			
 		}
+
+		public async Task<List<SearchUserDto>?> SearchBy(string userName, long currentGroupId)
+		{
+
+			try
+			{
+				return await Table<User>().Include(u=> u.UserGroups).Where(u => u.UserName!.Contains(userName)).OrderBy(u=> u.UserName).Select(u => new SearchUserDto
+				{
+					Id = u.Id,
+					UserName = u.UserName,
+					IsMember =  Table<UserGroup>().Any(ug=> ug.GroupId == currentGroupId && ug.UserId == u.Id)
+				}).ToListAsync();
+			}
+			catch (Exception e)
+			{
+				throw new Exception(e.Message);
+			}
+			
+		}
 	}
 }

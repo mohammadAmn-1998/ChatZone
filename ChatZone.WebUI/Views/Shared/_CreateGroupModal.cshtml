@@ -1,6 +1,6 @@
 ﻿<!-- Modal -->
-<form class="modal fade" id="createGroup_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" onsubmit="createNewGroup(event)">
-	<div class="modal-dialog" role="document">
+<form class="modal fade " id="createGroup_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" onsubmit="createNewGroup(event)">
+	<div class="modal-dialog modal-sm" role="document">
 		<div class="modal-content">
 			<div class="modal-header text-center justify-content-center ">
 				<h5 class="modal-title  " id="exampleModalLabel">ایجاد گروه </h5>
@@ -11,10 +11,13 @@
 
 				<label class="mb-2">انتخاب عکس</label>
 				<input class="form-control btn" type="file" id="group_image" />
-
-
-
+				<br/>
+				<label class="mt-2 form-check-label text-start">گروه به بقیه نشان داده نشود؟</label>
+				<input type="checkbox"class="form-check-inline" id="isPrivate_checkbox"/>
 			</div>
+			
+			
+
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-dismiss="modal">بستن</button>
 				<button type="submit" class="btn btn-primary">ایجاد </button>

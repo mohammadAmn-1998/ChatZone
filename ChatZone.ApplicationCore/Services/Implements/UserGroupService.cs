@@ -23,7 +23,7 @@ namespace ChatZone.ApplicationCore.Services.Implements
 		{
 		}
 
-		public async Task AddNewUserGroup(UserGroupDto dto)
+		public async Task JoinToGroup(UserGroupDto dto)
 		{
 
 			try

@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Views\Shared\_loading.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
@@ -20,6 +24,14 @@
   <ItemGroup>
     <ProjectReference Include="..\ChatZone.ApplicationCore\ChatZone.ApplicationCore.csproj" />
     <ProjectReference Include="..\ChatZone.Domain\ChatZone.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\lib\js\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Views\Shared\_loading.cshtml" />
   </ItemGroup>
 
 </Project>

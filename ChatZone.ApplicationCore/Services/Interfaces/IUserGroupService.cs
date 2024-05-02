@@ -12,7 +12,7 @@ namespace ChatZone.ApplicationCore.Services.Interfaces
 	{
 
 
-		Task AddNewUserGroup(UserGroupDto dto);
+		Task JoinToGroup(UserGroupDto dto);
 
 		Task<List<UserGroupDto>?> GetUserGroupList(long userId);
 

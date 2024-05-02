@@ -16,6 +16,10 @@ namespace ChatZone.ApplicationCore.Dtos.ChatGroups
 
 		public string? ImageName { get; set; }
 
+		public long OwnerId { get; set; }
+
+		public long ReceiverId { get; set; }
+
 		public DateTime? CreateDate { get; set; }
 
 		public List<ChatDto>? Chats { get; set; }
