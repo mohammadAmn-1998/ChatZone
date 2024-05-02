@@ -57,7 +57,7 @@
 
 
 		}@{
-			 if (Model.IsUser)
+			 if (Model.IsUser && !Model.IsJoined)
 			 {
 				 <div class="footer text-center">
 					 <a class="btn btn-success w-100" onclick="beginChatWithUser('@Model.UserId')">شروع چت</a>

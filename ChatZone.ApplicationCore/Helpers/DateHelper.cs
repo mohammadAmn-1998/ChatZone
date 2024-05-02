@@ -62,7 +62,7 @@ namespace ChatZone.ApplicationCore.Helpers
 			{
 				if (minutesLeft < 60)
 				{
-					return string.Format($"{minutesLeft} دقیقه پیش");
+					return string.Format("{0} ساعت{1} و  دقیقه پیش 	", hoursLeft,minutesLeft);
 				}
 
 				return string.Format($"{hoursLeft} ساعت پیش");

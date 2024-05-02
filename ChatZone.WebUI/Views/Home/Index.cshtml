@@ -24,9 +24,27 @@
 			@section scripts
 			{
 
-
+				
 				<script>
 
+
+					$(document).ready(function() {
+
+						loadUSerGroups();
+						if (Notification.permission !== "granted") {
+							Notification.requestPermission();
+
+						}
+
+						var result = getCookie("systemAlert");
+						if (result) {
+
+							result = JSON.parse(result);
+
+
+						}
+
+					});
 
 					var currentGroupId = 0;
 					var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
@@ -36,6 +54,8 @@
 					connection.on("receiveNotification", displayNotification);
 
 					connection.on("receiveChatGroup", displayChatGroup);
+
+					connection.on("receiveOperationResult", displaySweetAlert);
 
 					function start() {
 
@@ -55,6 +75,26 @@
 					connection.onclose(start);
 					start();
 
+
+					function getUserPrivateChats(event) {
+
+						let userId = event.srcElement.attributes[0].value;
+						console.log(userId);
+						$.ajax({
+							url: "/Home/GetUserChats?userId=" + userId,
+							type: "get"
+
+						}).done(function (data) {
+
+							$("#chat_content").html(data);
+
+
+						});
+
+
+					}
+
+
 					function displayNotification(data) {
 
 						var title = data.groupName;
@@ -69,6 +109,32 @@
 
 
 					}
+
+		function displaySweetAlert(result) {
+
+			if (result) {
+				console.log(result);
+				var status = result.status;
+				var message = result.message;
+				var isReload = result.isReload;
+
+				if (status == 200) {
+					Success("!عملیات موفق", message, false);
+				}
+				if (status == 10) {
+					ErrorAlert("عملیات ناموفق!", message, false);
+				}
+				if (status == 404) {
+					ErrorAlert("خطا!", message, false);
+				}
+
+			}
+			
+
+			
+
+
+		}
 
 					function displayNewChat(data) {
 
@@ -116,19 +182,8 @@
 
 					}
 				</script>
-				<script src="assets/home_page/js/signalr_custom.js"></script>
+
 				<script>
-
-					$(document).ready(function() {
-
-						loadUSerGroups();
-						if (Notification.permission !== "granted") {
-							Notification.requestPermission();
-
-						}
-
-
-					});
 
 
 					function createNewGroup(event) {
@@ -174,9 +229,8 @@
 									return false;
 								}
 								if (obj.message === "Success") {
-									alert("گروه جدید ایجاد شد!");
 									$('.modal').toggle();
-									window.location.reload();
+									
 									return true;
 								}
 							}
@@ -268,7 +322,7 @@
 									if (lastChat) {
 										$("#search_ul").append(`
 
-												<li data-token="${obj.token}" onclick="getUserChats(event)">
+														<li data-token="${obj.token}" onclick="getUserPrivateChats(event)">
 										   ${obj.title}
 									<img src="/assets/home_page/img/group_img/${obj.imageName}" alt="Avatar" />
 									<div class="text-start">
@@ -282,7 +336,7 @@
 									} else {
 										$("#search_ul").append(`
 
-																		<li data-token=${obj.token} onclick="getGroupChats(event)">
+																				<li data-token=${obj.token} onclick="getUserPrivateChats(event)">
 												   ${obj.title}
 													<img src="/assets/home_page/img/group_img/${obj.imageName}" alt="Avatar" />
 										
@@ -395,31 +449,38 @@
 							url: `/Home/AddMemberToGroup?groupId=${currentGroupId}&userId=${userId}`,
 							type: "get"
 
-						}).done(function(data) {
+						}).done(function(result) {
+							if (result) {
+								if (result.status.trim() == "success") {
+									var userId = result.userId;
+									var groupId = result.groupId;
 
-							console.log(data);
+									$("#users_list li").each(function() {
 
+										if ($(this).attr("data-id") == result.userId) {
+											$(this).removeAttr("onclick");
+											$(this).removeClass("btn");
+											$(this).removeClass("btn-info");
+											$(this).text('');
+											$(this).append(`<div class="p-2 w-100">${result.userName}<span>(عضو)</span>
+							</div>`);
+
+											console.log(this);
+										}
+
+
+									});
+
+
+								}
+
+
+							}
 						});
 
 					}
 
-					function getUserPrivateChats(event) {
-
-						let userId = event.srcElement.attributes[0].value;
-						console.log(userId);
-						$.ajax({
-							url: "/Home/GetUserChats?userId=" + userId,
-							type: "get"
-
-						}).done(function(data) {
-
-							$("#chat_content").html(data);
-
-
-						});
-
-
-					}
+					
 
 
 					function joinGroup(groupId) {
@@ -463,7 +524,8 @@
 						});
 
 					}
-
+				
+				
 
 				</script>
 

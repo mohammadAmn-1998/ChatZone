@@ -22,7 +22,7 @@ namespace ChatZone.WebUI.Controllers
 
 		#region injected services ctor
 
-		IHubContext<ChatHub> _hubContext;
+		private IHubContext<ChatHub> _hubContext;
 		IUserGroupService _UserGroupService;
 		IChatGroupService _ChatGroupService;
 		private IFileManagerService _fileManagerService;
@@ -31,7 +31,7 @@ namespace ChatZone.WebUI.Controllers
 
 		public HomeController(IUserGroupService userGroupService, IChatGroupService chatGroupService,
 			IFileManagerService fileManagerService, IChatService chatService, IUserService userService,
-			IHubContext<ChatHub> hubContext)
+			IHubContext<ChatHub> hubContext) : base(hubContext)
 		{
 			_UserGroupService = userGroupService;
 			_ChatGroupService = chatGroupService;
@@ -86,6 +86,7 @@ namespace ChatZone.WebUI.Controllers
 			};
 
 			await _UserGroupService.JoinToGroup(userGroupDto);
+			ErrorAlert("این پیام برای تست فرستاده شده است.....",true);
 			return new ObjectResult(new { message = "Success" });
 
 		}
@@ -218,7 +219,7 @@ namespace ChatZone.WebUI.Controllers
 			};
 
 			ViewBag.IsJoined = isJoined;
-
+			SuccessAlert("شما وارد این گروه شدید!");
 			return PartialView("_ChatsPartial", model);
 
 
@@ -290,6 +291,8 @@ namespace ChatZone.WebUI.Controllers
 			});
 
 			var model = FixPrivateChatGroup(result, userId);
+
+			SuccessAlert("شروع چت!");
 
 			return PartialView("_ChatsPartial", model);
 

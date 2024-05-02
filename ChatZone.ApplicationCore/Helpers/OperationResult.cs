@@ -11,24 +11,27 @@ namespace ChatZone.ApplicationCore.Helpers
 
 		public string Message { get; set; }
 		public OperationResultStatus Status { get; set; }
+		public bool IsReload { get; set; }
 
 		#region Success
 
-		public static OperationResult Success()
+		public static OperationResult Success(bool isReload = false)
 		{
 			return new OperationResult
 			{
 				Status = OperationResultStatus.Success,
 				Message = "عملیات موفق!",
+				IsReload = isReload
 			};
 		}
 
-		public static OperationResult Success(string message)
+		public static OperationResult Success(string message, bool isReload = false)
 		{
 			return new OperationResult
 			{
 				Status = OperationResultStatus.Success,
 				Message = message,
+				IsReload = isReload
 			};
 		}
 
@@ -36,21 +39,23 @@ namespace ChatZone.ApplicationCore.Helpers
 
 		#region Error
 
-		public static OperationResult Error()
+		public static OperationResult Error(bool isReload = false)
 		{
 			return new OperationResult
 			{
 				Status = OperationResultStatus.Error,
 				Message = "عملیات ناموفق!",
+				IsReload = isReload
 			};
 		}
 
-		public static OperationResult Error(string message)
+		public static OperationResult Error(string message, bool isReload = false)
 		{
 			return new OperationResult
 			{
 				Status = OperationResultStatus.Error,
 				Message = message,
+				IsReload = isReload
 			};
 		}
 
@@ -58,21 +63,23 @@ namespace ChatZone.ApplicationCore.Helpers
 
 		#region NotFound
 
-		public static OperationResult NotFound()
+		public static OperationResult NotFound(bool isReload = false)
 		{
 			return new OperationResult
 			{
 				Status = OperationResultStatus.NotFound,
 				Message = "صفحه یا چیز مورد نظر پیدا نشد!",
+				IsReload = isReload
 			};
 		}
 
-		public static OperationResult NotFound(string message)
+		public static OperationResult NotFound(string message, bool isReload = false)
 		{
 			return new OperationResult
 			{
 				Status = OperationResultStatus.NotFound,
 				Message = message,
+				IsReload = isReload
 			};
 		}
 
