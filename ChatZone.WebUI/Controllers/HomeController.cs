@@ -12,6 +12,7 @@ using ChatZone.WebUI.ViewModels.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.JSInterop.Infrastructure;
 using Newtonsoft.Json.Linq;
 
 namespace ChatZone.WebUI.Controllers
@@ -40,11 +41,7 @@ namespace ChatZone.WebUI.Controllers
 			_userService = userService;
 			_hubContext = hubContext;
 		}
-
-
 		#endregion
-
-
 
 		public IActionResult Index()
 		{
@@ -86,7 +83,7 @@ namespace ChatZone.WebUI.Controllers
 			};
 
 			await _UserGroupService.JoinToGroup(userGroupDto);
-			ErrorAlert("این پیام برای تست فرستاده شده است.....",true);
+			SuccessAlert("گروه ساخته شد!",true);
 			return new ObjectResult(new { message = "Success" });
 
 		}
@@ -96,9 +93,9 @@ namespace ChatZone.WebUI.Controllers
 
 			var userGroupsList = await _UserGroupService.GetUserGroupList(HttpContext.User.GetUserId());
 
-
 			var model = userGroupsList?.Select(ug => new UserGroupViewModel
 			{
+				IsUser = ug.IsUserChat,
 				Title = ug.ChatGroup?.Title,
 				ImageName = ug.ChatGroup?.GroupImage,
 				Token = ug.ChatGroup?.Token,
@@ -149,17 +146,19 @@ namespace ChatZone.WebUI.Controllers
 
 			var model = new ChatGroupViewModel
 			{
-
+				
 				GroupId = chatsDto.GroupId,
 				GroupTitle = chatsDto?.GroupTitle,
 				ImageName = chatsDto?.ImageName,
+				IsPrivate = chatsDto!.IsPrivate,
 				OwnerId = chatsDto?.OwnerId ??0,
 				ReceiverId = chatsDto?.ReceiverId ??0 ,
 				CreateDate = chatsDto?.CreateDate?.ConvertToPersianDate(),
 				IsJoined = isJoined,
+				IsUser = false,
 				Chats = chatsDto?.Chats?.Select(c => new ChatViewModel
 				{
-
+					
 					ChatBody = c.ChatBody,
 					GroupId = c.GroupId,
 					UserName = c.UserName,
@@ -168,11 +167,21 @@ namespace ChatZone.WebUI.Controllers
 					FileName = c.FileName,
 					IsCallerChat = c.UserId == HttpContext.User.GetUserId()
 				}).ToList()
+				,OwnerUser = chatsDto?.OwnerUser != null ? new UserProfileViewModel()
+				{
+					Id = chatsDto.OwnerUser.Id,
+					UserName = chatsDto.OwnerUser.UserName,
+					Avatar = chatsDto.OwnerUser.Avatar,
+					Bio = chatsDto.OwnerUser.Bio
+				} : null
 			};
 
 			ViewBag.isJoined = isJoined;
 
-			return PartialView("_ChatsPartial", model);
+
+			var fixedModel = FixUserPrivateChatGroup(model);
+
+			return PartialView("_ChatsPartial", fixedModel);
 
 
 		}
@@ -330,6 +339,79 @@ namespace ChatZone.WebUI.Controllers
 			return new ObjectResult(new {Status="success",UserId = userId,GroupId = groupId,UserName= user!.UserName});
 		}
 
+		public async Task<IActionResult> GetUserProfile(long userId)
+		{
+
+
+			var user = await _userService.GetUserById(userId);
+			if (user == null)
+			{
+				NotFoundAlert("کاربر پیدا نشد");
+				return Empty;
+			}
+
+			var model = new UserProfileViewModel
+			{
+				Id = user.Id,
+				UserName = user.UserName,
+				Avatar = user.Avatar,
+				Bio = user.Bio
+			};
+			return new ObjectResult(model);
+		}
+
+		public async Task<IActionResult> GetChatGroupProfile(long groupId)
+		{
+
+
+			var users =await _UserGroupService.GetGroupUsers(groupId);
+			var chatGroup = await _ChatGroupService.GetChatGroupBy(groupId);
+
+			var model = new ChatGroupProfileViewModel
+			{
+				Users = users?.Select(u => new SearchUserViewModel
+					{
+						Id = u.UserId,
+						UserName = u.UserName,
+
+					}).ToList(),
+					
+				Image = chatGroup?.GroupImage,
+				Title = chatGroup?.Title,
+
+			};
+			return new ObjectResult(model);
+
+		}
+
+		public async Task<IActionResult> DeleteChatGroup(long groupId)
+		{
+
+			var result = await _ChatGroupService.DeleteChatGroup(groupId);
+
+			
+			 ShowAlert(result,true);
+
+			 Thread.Sleep(5000);
+
+			 return Redirect("/");
+
+
+		}
+
+		public async Task<IActionResult> LeaveChatGroup(long groupId)
+		{
+
+
+			var result = await _UserGroupService.LeaveGroup(HttpContext.User.GetUserId(), groupId);
+			ShowAlert(result, true);
+
+			Thread.Sleep(5000);
+
+			return Redirect("/");
+
+
+		}
 
 		#region private helper Methods
 
@@ -411,8 +493,6 @@ namespace ChatZone.WebUI.Controllers
 			foreach (var groupDto in groupLists)
 			{
 
-				
-
 				var receiverId = groupDto?.ChatGroup!.ReceiverId;
 				if (receiverId is not null or 0)
 				{
@@ -424,6 +504,7 @@ namespace ChatZone.WebUI.Controllers
 						model.Add(
 							new UserGroupViewModel
 							{
+								IsUser = groupDto != null && groupDto.IsUserChat,
 								Title = groupDto!.ChatGroup!.OwnerUser!.UserName,
 								ImageName = groupDto.ChatGroup?.OwnerUser!.Avatar,
 								Token = groupDto.ChatGroup?.Token,
@@ -441,6 +522,7 @@ namespace ChatZone.WebUI.Controllers
 						model.Add(
 							new UserGroupViewModel
 							{
+								IsUser = groupDto != null && groupDto.IsUserChat,
 								Title = groupDto!.ChatGroup!.Title,
 								ImageName = groupDto.ChatGroup?.GroupImage,
 								Token = groupDto.ChatGroup?.Token,
@@ -458,6 +540,7 @@ namespace ChatZone.WebUI.Controllers
 					model.Add(
 						new UserGroupViewModel
 						{
+							IsUser = groupDto != null && groupDto.IsUserChat,
 							Title = groupDto!.ChatGroup!.Title,
 							ImageName = groupDto.ChatGroup?.GroupImage,
 							Token = groupDto.ChatGroup?.Token,
@@ -472,6 +555,19 @@ namespace ChatZone.WebUI.Controllers
 			}
 
 			return model ;
+
+		}
+
+		private ChatGroupViewModel FixUserPrivateChatGroup(ChatGroupViewModel model)
+		{
+
+			if (model.ReceiverId == HttpContext.User.GetUserId())
+			{
+				model.GroupTitle = model.OwnerUser!.UserName;
+				model.ImageName = model.OwnerUser.Avatar;
+			}
+
+			return model;
 
 		}
 

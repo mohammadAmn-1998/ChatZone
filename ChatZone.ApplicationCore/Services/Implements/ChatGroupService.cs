@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ChatZone.ApplicationCore.Dtos.ChatGroups;
 using ChatZone.ApplicationCore.Dtos.Chats;
 using ChatZone.ApplicationCore.Dtos.Users;
+using ChatZone.ApplicationCore.Helpers;
 using ChatZone.ApplicationCore.Services.Base;
 using ChatZone.ApplicationCore.Services.Interfaces;
 using ChatZone.Domain.Context;
@@ -177,6 +178,28 @@ namespace ChatZone.ApplicationCore.Services.Implements
 			catch (Exception e)
 			{
 				return null;
+			}
+		}
+
+		public async Task<OperationResult> DeleteChatGroup(long groupId)
+		{
+			try
+			{
+				var chatGroup = await GetById<ChatGroup>(groupId);
+
+				if(chatGroup is null)
+					return OperationResult.NotFound();
+
+				chatGroup.IsDeleted = true;
+
+				Update(chatGroup);
+				await Save();
+
+				return OperationResult.Success("گروه حذف شد!");
+			}
+			catch (Exception e)
+			{
+				return OperationResult.Error();
 			}
 		}
 	}

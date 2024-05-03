@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ChatZone.ApplicationCore.Dtos.ChatGroups;
 using ChatZone.ApplicationCore.Dtos.Chats;
+using ChatZone.ApplicationCore.Dtos.Users;
 using ChatZone.ApplicationCore.Services.Base;
 using ChatZone.ApplicationCore.Services.Interfaces;
 using ChatZone.Domain.Context;
@@ -24,18 +25,20 @@ namespace ChatZone.ApplicationCore.Services.Implements
 
 			try
 			{
-				var result = Table<ChatGroup>().Include(c => c.Chats)?.ThenInclude(c=> c.User)
-					.FirstOrDefault(ch => ch.Token == groupToken);
+				var result = Table<ChatGroup>().Include(c => c.Chats)?.ThenInclude(c=> c.User).Include(ch=> ch.OwnerUser)
+					.FirstOrDefault(ch => ch.Token == groupToken );
 
 				if(result == null)
 					return null;
 
 				var dto = new GroupChatsDto
 				{
+					
 					GroupId = result.Id,
 					OwnerId = result.OwnerId,
 					GroupTitle = result.Title,
 					ImageName = result.GroupImage,
+					IsPrivate = result.IsPrivate,
 					ReceiverId = result.ReceiverId ??0,
 					CreateDate = result.CreatedDate,
 					Chats = result.Chats?.OrderBy(c => c.CreatedDate).Select(c => new ChatDto
@@ -48,6 +51,16 @@ namespace ChatZone.ApplicationCore.Services.Implements
 						UserId = c.UserId,
 						FileName = c.FileName
 					}).ToList()
+					,OwnerUser = result.OwnerUser != null ?  new UserDto
+					{
+						Id = result.OwnerUser.Id,
+						UserName = result.OwnerUser.UserName,
+						Avatar = result.OwnerUser.Avatar,
+						Bio = result.OwnerUser.Bio,
+						CreatedDate = result.OwnerUser.CreatedDate,
+						IsDeleted = result.OwnerUser.IsDeleted,
+						
+					} :null
 				};
 
 				return dto;

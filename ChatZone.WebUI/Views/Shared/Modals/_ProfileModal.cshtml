@@ -1,0 +1,48 @@
+﻿
+@using ChatZone.ApplicationCore.Helpers
+@model ChatZone.WebUI.ViewModels.ChatGroups.ChatGroupViewModel?
+@{
+	var userId = Context.User.GetUserId();
+}
+<div class="modal fade bd-example-modal-sm" id="profile_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-sm" role="document" id="modal_content">
+		
+		<div class="modal-content">
+			<div class="modal-header text-center justify-content-center ">
+				<h5 class="modal-title  " id="exampleModalLabel">پروفایل</h5>
+
+			</div>
+			<div class="profile-modal modal-body  text-center">
+
+				<label class="mb-2">اعضای گروه</label>
+				<ul id="members_list">
+					
+				</ul>
+			</div>
+
+
+
+			<div class="modal-footer">
+				@if (Model?.ReceiverId == 0 && userId == Model.OwnerId)
+				{
+					<button type="button"  id="add_member_modal_button" class="btn btn-primary w-100" data-toggle="modal" onclick="handleAddMemberModalButton()" data-target="#add_member_modal">اضافه کردن عضو جدید</button>
+				}
+				
+				@if ( Model?.ReceiverId == 0 && !Model.IsUser)
+				{
+					@if (Model.OwnerId == userId)
+					{
+						<a class=" btn btn-danger w-100" asp-controller="Home" asp-action="DeleteChatGroup" asp-route-groupId="@Model?.GroupId">حذف گروه</a>
+					}
+					else
+					{
+						<a class=" btn btn-danger w-100" asp-controller="Home" asp-action="LeaveChatGroup" asp-route-groupId="@Model?.GroupId">ترک گروه</a>
+					}
+				}
+
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">انصراف</button>
+			</div>
+		</div>
+
+	</div>
+</div>

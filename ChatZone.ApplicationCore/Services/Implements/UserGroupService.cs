@@ -19,6 +19,8 @@ namespace ChatZone.ApplicationCore.Services.Implements
 {
 	public class UserGroupService : BaseService,IUserGroupService
 	{
+		
+
 		public UserGroupService(ChatDbContext context) : base(context)
 		{
 		}
@@ -54,16 +56,21 @@ namespace ChatZone.ApplicationCore.Services.Implements
 
 			try
 			{
-				return await Table<UserGroup>().Where(u => u.UserId == userId && (!u.ChatGroup!.IsPrivate || u.ChatGroup!.OwnerId == userId || u.ChatGroup.ReceiverId == userId)).Include(ug=> ug.ChatGroup).Include(ug=> ug.ChatGroup!.OwnerUser).Include(ug=> ug.ChatGroup!.ReceiverUser).Include(ug=> ug.ChatGroup!.Chats)
+				var result = Table<UserGroup>()
+
+					.Include(ug => ug.ChatGroup).Include(ug => ug.ChatGroup!.OwnerUser)
+					.Include(ug => ug.ChatGroup!.ReceiverUser).Include(ug => ug.ChatGroup!.Chats)
+					.Where(u => u.UserId == userId)
+					.OrderByDescending(ug => ug.CreatedDate)
 					.Select(u => new UserGroupDto()
 					{
 						Id = u.Id,
 						GroupId = u.GroupId,
-						
+						IsUserChat = u.ChatGroup != null && u.ChatGroup.ReceiverId != 0,
 						UserId = userId,
 						ChatGroup = new ChatGroupDto
 						{
-							Id = u.ChatGroup.Id ,
+							Id = u.ChatGroup.Id,
 							CreatedDate = u.ChatGroup.CreatedDate,
 							IsDeleted = u.ChatGroup.IsDeleted,
 							Title = u.ChatGroup.Title,
@@ -72,8 +79,8 @@ namespace ChatZone.ApplicationCore.Services.Implements
 							Token = u.ChatGroup.Token,
 							OwnerId = u.ChatGroup.OwnerId,
 							IsPrivate = u.ChatGroup.IsPrivate,
-							ReceiverId = u.ChatGroup.ReceiverId??0,
-							Chats = u.ChatGroup!.Chats.Select(ch=> new ChatDto
+							ReceiverId = u.ChatGroup.ReceiverId ?? 0,
+							Chats = u.ChatGroup!.Chats.Select(ch => new ChatDto
 							{
 								Id = ch.Id,
 								CreateDate = ch.CreatedDate,
@@ -81,7 +88,7 @@ namespace ChatZone.ApplicationCore.Services.Implements
 								GroupId = ch.GroupId,
 								UserId = ch.UserId,
 								FileName = ch.FileName
-							}).ToList()?? null,
+							}).ToList() ?? null,
 							OwnerUser = new UserDto
 							{
 								Id = u.ChatGroup.OwnerUser!.Id,
@@ -92,21 +99,31 @@ namespace ChatZone.ApplicationCore.Services.Implements
 								CreatedDate = u.ChatGroup.OwnerUser!.CreatedDate,
 								IsDeleted = u.ChatGroup.OwnerUser!.IsDeleted,
 							},
-							ReceiverUser = u.ChatGroup.ReceiverUser !=null ?   new UserDto
-							{
-								Id = u.ChatGroup.ReceiverUser.Id ,
-								UserName = u.ChatGroup.ReceiverUser!.UserName,
-								Password = u.ChatGroup.ReceiverUser!.Password,
-								Avatar = u.ChatGroup.ReceiverUser!.Avatar,
-								Bio = u.ChatGroup.ReceiverUser!.Bio,
-								CreatedDate = u.ChatGroup.ReceiverUser!.CreatedDate,
-								IsDeleted = u.ChatGroup.ReceiverUser!.IsDeleted,
-							} : null
+							ReceiverUser = u.ChatGroup.ReceiverUser != null
+								? new UserDto
+								{
+									Id = u.ChatGroup.ReceiverUser.Id,
+									UserName = u.ChatGroup.ReceiverUser!.UserName,
+									Password = u.ChatGroup.ReceiverUser!.Password,
+									Avatar = u.ChatGroup.ReceiverUser!.Avatar,
+									Bio = u.ChatGroup.ReceiverUser!.Bio,
+									CreatedDate = u.ChatGroup.ReceiverUser!.CreatedDate,
+									IsDeleted = u.ChatGroup.ReceiverUser!.IsDeleted,
+								}
+								: null
 
 						},
 						CreateDate = u.CreatedDate,
-						
-					}).ToListAsync();
+
+
+
+					});
+
+
+
+				return await result.ToListAsync();
+
+
 			}
 			catch (Exception e)
 			{
@@ -169,9 +186,10 @@ namespace ChatZone.ApplicationCore.Services.Implements
 			try
 			{
 
-				return await Table<UserGroup>().Where(g => g.GroupId == groupId).Select(g => new GroupUserDto
+				return await Table<UserGroup>().Include(ug=> ug.User).Where(g => g.GroupId == groupId).Select(g => new GroupUserDto
 				{
-					UserId = g.UserId
+					UserId = g.UserId,
+					UserName = g.User!.UserName?? null
 				}).ToListAsync();
 
 
@@ -210,6 +228,31 @@ namespace ChatZone.ApplicationCore.Services.Implements
 			
 
 
+		}
+
+		public async Task<OperationResult> LeaveGroup(long userId, long groupId)
+		{
+
+			try
+			{
+
+				var userGroup =
+					await Table<UserGroup>().SingleOrDefaultAsync(ug => ug.UserId == userId && ug.GroupId == groupId);
+				if(userGroup is null)
+					return OperationResult.NotFound();
+
+				userGroup.IsDeleted = true;
+
+				Update(userGroup);
+				await Save();
+
+				return OperationResult.Success("شما گروه را ترک کردید!");
+
+			}
+			catch (Exception e)
+			{
+				return OperationResult.Error();
+			}
 		}
 	}
 }

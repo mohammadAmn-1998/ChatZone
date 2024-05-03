@@ -1,5 +1,6 @@
 ﻿using ChatZone.ApplicationCore.Helpers;
 using ChatZone.WebUI.Hubs;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
@@ -9,7 +10,6 @@ namespace ChatZone.WebUI.Controllers
 	public class BaseController : Controller
 	{
 		private IHubContext<ChatHub> _hubContext;
-
 		#region SuccessAlert
 
 		public BaseController(IHubContext<ChatHub> hubContext)
@@ -33,6 +33,8 @@ namespace ChatZone.WebUI.Controllers
 			await _hubContext.Clients.User(HttpContext.User.GetUserId().ToString())
 				.SendAsync("receiveOperationResult", OperationResult.Success(message,isReload));
 		}
+
+
 
 		#endregion
 
@@ -75,6 +77,14 @@ namespace ChatZone.WebUI.Controllers
 			await _hubContext.Clients.User(HttpContext.User.GetUserId().ToString())
 				.SendAsync("receiveOperationResult", OperationResult.NotFound(message,isReload));
 
+		}
+
+		public async void ShowAlert(OperationResult result, bool isReload)
+		{
+			result.IsReload = isReload;
+			await _hubContext.Clients.User(HttpContext.User.GetUserId().ToString())
+				.SendAsync("receiveOperationResult", result);
+			
 		}
 
 		#endregion

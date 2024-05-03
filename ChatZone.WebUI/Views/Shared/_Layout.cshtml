@@ -22,12 +22,13 @@
 <script src="/assets/home_page/js/bootstrap.bundle.min.js"></script>
 <script src="/assets/global/sweetalert2/js/extended-ui-sweetalert2.js"></script>
 <script src="/assets/global/sweetalert2/js/sweetalert2.js"></script>
-<script src="/assets/home_page/js/custom.js"></script>
 <script src="/assets/global/sweetalert2/js/customSweetAlert.js"></script>
 <script src="lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
-	<script src="/assets/home_page/js/signalr_custom.js"></script>
-		<partial name="_ValidationScriptsPartial"/>
-			@await RenderSectionAsync("scripts", false);
+<script src="/assets/home_page/js/signalr_custom.js"></script>
+<script src="/assets/home_page/js/custom_js.js"></script>
+	
+@await RenderSectionAsync("scripts", false);
+<partial name="_ValidationScriptsPartial"/>
 		</body>
 
 </html>

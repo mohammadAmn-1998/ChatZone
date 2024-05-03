@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Content Remove="Views\Shared\_loading.cshtml" />
+    <Content Remove="wwwroot\assets\home_page\js\custom.js" />
   </ItemGroup>
 
   <ItemGroup>

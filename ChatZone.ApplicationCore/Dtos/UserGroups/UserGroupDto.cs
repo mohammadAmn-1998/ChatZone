@@ -26,6 +26,8 @@ namespace ChatZone.ApplicationCore.Dtos.UserGroups
 
 		public ChatGroupDto? ChatGroup { get; set; }
 
+		public bool IsUserChat { get; set; }
+
 		
 
 	}

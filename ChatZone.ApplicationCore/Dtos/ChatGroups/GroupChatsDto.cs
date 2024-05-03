@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
+using ChatZone.ApplicationCore.Dtos.Users;
 
 namespace ChatZone.ApplicationCore.Dtos.ChatGroups
 {
@@ -22,7 +23,11 @@ namespace ChatZone.ApplicationCore.Dtos.ChatGroups
 
 		public DateTime? CreateDate { get; set; }
 
+		public bool IsPrivate { get; set;  }
+
 		public List<ChatDto>? Chats { get; set; }
+
+		public UserDto? OwnerUser { get; set; }
 
 
 	}

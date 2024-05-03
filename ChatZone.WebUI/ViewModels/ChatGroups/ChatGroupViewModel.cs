@@ -1,4 +1,5 @@
 ﻿using ChatZone.WebUI.ViewModels.Chats;
+using ChatZone.WebUI.ViewModels.Users;
 
 namespace ChatZone.WebUI.ViewModels.ChatGroups
 {
@@ -20,8 +21,13 @@ namespace ChatZone.WebUI.ViewModels.ChatGroups
 
 		public long OwnerId { get; set; }
 
+		public bool IsPrivate { get; set; }
+
 		public long ReceiverId { get; set; }
 
 		public List<ChatViewModel>? Chats { get; set; }
+
+		public UserProfileViewModel? OwnerUser { get; set; }
+
 	}
 }
