@@ -7,8 +7,9 @@ $("#login-btn").click(function() {
     $("#login").slideDown();
 });
 
-
 $(document).ready(function () {
+
+    connection.onclose(start);
 
     loadUSerGroups();
     if (Notification.permission !== "granted") {
@@ -83,7 +84,6 @@ function createNewGroup(event) {
     return false;
 }
 
-
 function loadUSerGroups() {
 
     $.ajax({
@@ -108,7 +108,7 @@ function getUserProfile(id) {
 
         }).done(function (data) {
 
-            console.log(data);
+           
 
             $(".profile-modal").empty();
 
@@ -134,7 +134,7 @@ function getChatGroupProfile(id) {
 
         }).done(function (data) {
 
-            console.log(data);
+           
 
             $("#members_list").empty();
 
@@ -157,7 +157,6 @@ function getChatGroupProfile(id) {
 function getGroupChats(event) {
 
     let token = event.srcElement.attributes[0].value;
-
 
     if (!token)
         return;
@@ -212,7 +211,6 @@ function search() {
         $("#search_ul").empty();
         data.forEach(function (obj) {
             var lastChat = obj.lastChat;
-            console.log(obj);
             if (obj.isUser) {
 
                 $("#search_ul").append(`
@@ -285,7 +283,6 @@ function searchUsers() {
     }).done(function (data) {
 
         $("#users_list").empty();
-        console.log(data);
         data.forEach(user => {
             if (user.isMember) {
                 $("#users_list").append(`
@@ -322,7 +319,6 @@ function searchUsers() {
 
 function addMember(event) {
     var userId = event.target.getAttribute('data-id');
-    console.log(event);
 
     if (!userId)
         return;
@@ -334,8 +330,7 @@ function addMember(event) {
     }).done(function (result) {
         if (result) {
             if (result.status.trim() == "success") {
-                var userId = result.userId;
-                var groupId = result.groupId;
+               
 
                 $("#users_list li").each(function () {
 
@@ -361,7 +356,6 @@ function addMember(event) {
     });
 
 }
-
 
 function joinGroup(groupId) {
 
@@ -405,12 +399,28 @@ function beginChatWithUser(userId) {
 
 }
 
+function getUserPrivateChats(event) {
+
+    let userId = event.srcElement.attributes[0].value;
+    $.ajax({
+        url: "/Home/GetUserChats?userId=" + userId,
+        type: "get"
+
+    }).done(function (data) {
+
+        $("#chat_content").html(data);
+
+
+    });
+
+
+}
+
 function handleAddMemberModalButton(parameters) {
 
     $("#profile_modal").fadeOut();
 
 }
-
 
 function reloadWindow() {
 

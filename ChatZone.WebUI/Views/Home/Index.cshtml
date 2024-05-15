@@ -1,9 +1,8 @@
 ﻿
-<partial name="Modals/_CreateGroupModal"/>
+<partial name="Modals/_CreateGroupModal" />
 <div class="disConnect ">
 
-	<div class="loading"style="width: 10%; height: 10%; border-radius: 100%;">
-		
+	<div class="loading" style="width: 10%; height: 10%; border-radius: 100%;">
 	</div><div id="loading-text">
 		ارتباط قطع شد...<br />
 		...در حال ارتباط گیری مجدد
@@ -11,159 +10,177 @@
 
 </div>
 <div class="row">
-	
+
 	<div class="col-8 chat-content" id="chat_content">
-		
 	</div>
 
 	<div class="col-4 rooms" id="user_groups">
-
 	</div>
 </div>
 
-			@section scripts
-			{
-				
-
-				<script>
-	
-
-					
+@section scripts
+{
 
 
-					var currentGroupId = 0;
-					var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+	<script>
 
-					connection.on("receiveChat", displayNewChat);
+		var currentGroupId = 0;
+		var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 
-					connection.on("receiveNotification", displayNotification);
+		connection.on("receiveChat", displayNewChat);
 
-					connection.on("receiveChatGroup", displayChatGroup);
+		connection.on("receiveChatNotification", displayChatNotification);
 
-					connection.on("receiveOperationResult", displaySweetAlert);
+		connection.on("receiveChatGroupNotification",displayNotification);
 
-					function start() {
+		connection.on("receiveChatGroup", displayChatGroup);
 
-						try {
-							connection.start();
-							console.log("start");
-							$(".disConnect").hide();
-						} catch (e) {
+		connection.on("receiveOperationResult", displaySweetAlert);
 
-							$(".disConnect").show();
-							setTimeout(start, 3000);
+		connection.on("receiveNewChatGroup", displayNewChatGroup);
 
-						}
+		function start() {
 
-					}
+			try {
+				connection.start();
+				console.log("start");
+				$(".disConnect").hide();
+			} catch (e) {
+				console.log("connection disconnected!");
+				$(".disConnect").show();
+				setTimeout(start, 3000);
 
-					connection.onclose(start);
-					start();
-
-
-					function getUserPrivateChats(event) {
-
-						let userId = event.srcElement.attributes[0].value;
-						console.log(userId);
-						$.ajax({
-							url: "/Home/GetUserChats?userId=" + userId,
-							type: "get"
-
-						}).done(function(data) {
-
-							$("#chat_content").html(data);
-
-
-						});
-
-
-					}
-
-
-					function displayNotification(data) {
-
-						var title = data.groupName;
-						var body = `${data.userName} :  \n ${data.chatBody}`;
-						if (currentGroupId !== data.groupId.toString()) {
-							var notification = new Notification(title,
-								{
-									body: body
-								});
-
-						}
-
-
-					}
-
-					function displaySweetAlert(result) {
-
-						if (result) {
-							console.log(result);
-							var status = result.status;
-							var message = result.message;
-							var isReload = result.isReload;
-
-							if (status == 200) {
-								Success("!عملیات موفق", message, isReload);
-							}
-							if (status == 10) {
-								ErrorAlert("عملیات ناموفق!", message, isReload);
-							}
-							if (status == 404) {
-								ErrorAlert("خطا!", message, isReload);
-							}
-
-						}
-
-
-					}
-
-					function displayNewChat(data) {
-
-
-						if (!data)
-							return;
-
-						var chatBody = data.chatBody;
-						var createDate = data.createDate;
-						var userName = data.userName;
-						var userId = data.userId;
-						var userId = data.userId;
-						var isCallerChat = data.isCallerChat;
-						if (isCallerChat) {
-
-
-							$(".chats").append(`
-						<div class="chat-me">
-							<div class="chat">
-									<i> شما : </i>
-								<p> ${chatBody}</p>
-								<span>${createDate}</span>
-							</div>
-						</div>`);
-
-
-						} else {
-
-							$(".chats").append(`
-						<div class="chat-you">
-							<div class="chat">
-									<i>${userName}</i>
-								<p> ${chatBody}</p>
-								<span>${createDate}</span>
-							</div>
-						</div>`);
-						}
-
-
-					}
-
-					function displayChatGroup(data) {
-
-						console.log(data);
-
-					}
-				</script>
-	
-				
 			}
+
+		}
+
+		
+		
+		connection.onclose(start);
+
+		function displayChatNotification(data) {
+
+			var title = data.groupName;
+			var body = `${data.userName} :  \n ${data.chatBody}`;
+			if (currentGroupId !== data.groupId.toString()) {
+				var notification = new Notification(title,
+					{
+						body: body
+					});
+
+			}
+
+
+		}
+
+		function displayNotification(data) {
+
+			var title = data.title;
+			var body = data.body;
+			var notification = new Notification(title,
+					{
+						body: body
+					});
+
+
+		}
+
+		function displaySweetAlert(result) {
+
+			if (result) {
+
+				var status = result.status;
+				var message = result.message;
+				var isReload = result.isReload;
+
+				if (status == 200) {
+					Success("!عملیات موفق", message, isReload);
+				}
+				if (status == 10) {
+					ErrorAlert("عملیات ناموفق!", message, isReload);
+				}
+				if (status == 404) {
+					ErrorAlert("خطا!", message, isReload);
+				}
+
+			}
+
+
+		}
+
+		function displayNewChatGroup(userGroup) {
+
+			if (!userGroup)
+				return;
+
+
+
+			$("#search_ul").prepend(`
+
+																	<li data-token="${userGroup.token}" onclick="getGroupChats(event)">
+														${userGroup.title}
+																			<img src="/assets/home_page/img/group_img/${userGroup.imageName}" alt="Avatar" />
+																			<div class="text-start">
+																				<span>${userGroup.lastChat}<br/>${userGroup.lastChatDate}</span>
+																			</div>
+
+																		</li>
+
+															`);
+
+		}
+
+
+		function displayNewChat(data) {
+
+
+			if (!data)
+				return;
+
+			var chatBody = data.chatBody;
+			var createDate = data.createDate;
+			var userName = data.userName;
+			var userId = data.userId;
+			var userId = data.userId;
+			var isCallerChat = data.isCallerChat;
+			if (isCallerChat) {
+
+
+				$(".chats").append(`
+																		<div class="chat-me">
+																			<div class="chat">
+																					<i> شما : </i>
+																				<p> ${chatBody}</p>
+																				<span>${createDate}</span>
+																			</div>
+																		</div>`);
+
+
+			} else {
+
+				$(".chats").append(`
+																		<div class="chat-you">
+																			<div class="chat">
+																					<i>${userName}</i>
+																				<p> ${chatBody}</p>
+																				<span>${createDate}</span>
+																			</div>
+																		</div>`);
+			}
+
+
+		}
+
+		function displayChatGroup(data) {
+
+			$("#user_groups").prepend(`
+
+
+
+																		`);
+
+		}
+	</script>
+
+
+}

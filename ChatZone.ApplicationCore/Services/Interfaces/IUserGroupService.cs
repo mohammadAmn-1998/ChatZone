@@ -26,6 +26,8 @@ namespace ChatZone.ApplicationCore.Services.Interfaces
 		Task<bool> IsUserAlreadyJoinedToPrivateChat(long userId, long currentUserId);
 
 		Task<OperationResult> LeaveGroup(long userId,long groupId);
+		
+		Task<UserGroupDto?> GetUserGroupBy(long groupId);
 
 	}
 }

@@ -1,6 +1,5 @@
 ﻿
 
-
 function sendMessage(event) {
 
     event.preventDefault();

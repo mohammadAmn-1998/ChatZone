@@ -7,6 +7,7 @@ using ChatZone.ApplicationCore.Services.Interfaces;
 using ChatZone.WebUI.Hubs;
 using ChatZone.WebUI.ViewModels.ChatGroups;
 using ChatZone.WebUI.ViewModels.Chats;
+using ChatZone.WebUI.ViewModels.CustomModels;
 using ChatZone.WebUI.ViewModels.UserGroups;
 using ChatZone.WebUI.ViewModels.Users;
 using Microsoft.AspNetCore.Authorization;
@@ -335,7 +336,38 @@ namespace ChatZone.WebUI.Controllers
 			});
 			SuccessAlert("کاربر به گروه اضافه شد!");
 			var user = await _userService.GetUserById(userId);
-			
+
+			var userGroupDto = await _UserGroupService.GetUserGroupBy(groupId);
+
+			if (userGroupDto == null)
+			{
+				ErrorAlert("مشکلی به وجود آمده دوباره تلاش کنید");
+				return View("Index");
+			}
+
+
+			var model = new UserGroupViewModel
+			{
+				Title = userGroupDto.ChatGroup!.Title,
+				ImageName = userGroupDto.ChatGroup.GroupImage,
+				Token = userGroupDto.ChatGroup.Token,
+				IsUser = false,
+				LastChat = userGroupDto.ChatGroup.Chats?.OrderBy(ch=> ch.CreateDate).LastOrDefault()?.ChatBody,
+				LastChatDate = DateTime.Now.ConvertToPersianDate()
+			};
+
+			await _hubContext.Clients.User(userId.ToString()).SendAsync("receiveNewChatGroup", model);
+
+			var notificationModel = new NotificationViewModel
+			{
+				Title = $"شما به گروه {model.Title} !اضافه شدید",
+				Body = DateTime.Now.ConvertToPersianDate()
+			};
+
+
+			await _hubContext.Clients.User(userId.ToString()).SendAsync(
+				"receiveChatGroupNotification", notificationModel);
+
 			return new ObjectResult(new {Status="success",UserId = userId,GroupId = groupId,UserName= user!.UserName});
 		}
 
