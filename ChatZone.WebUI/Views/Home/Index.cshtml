@@ -39,6 +39,8 @@
 
 		connection.on("receiveFile", displayNewFile);
 
+		connection.on("receiveCurrentGroupId", setCurrentGroupId);
+
 		function start() {
 
 			try {
@@ -141,12 +143,12 @@
 			var userId = data.userId;
 			var isCallerChat = data.isCallerChat;
 
-			console.log("test");
+
 			if (currentGroupId !== data.groupId.toString() || currentGroupId === "undefined")
 				return;
-			console.log("test2");
+		
 			if (isCallerChat) {
-				console.log("test2");
+			
 
 				$(".chats").append(`
 																		<div class="chat-me">
@@ -185,7 +187,7 @@
 
 		function displayNewFile(data) {
 
-			console.log(data);
+			
 
 			var caption = data.chatBody;
 			if (!caption) {
@@ -199,7 +201,7 @@
 
 
 			var extension = fileName.split('.').pop();
-			console.log(extension);
+			
 
 			if (extension === 'jpg' || extension === 'bmp' || extension === 'jpeg' || extension === 'png') {
 
@@ -284,6 +286,12 @@
 				}
 
 			}
+
+		}
+
+		function setCurrentGroupId(groupId) {
+
+			currentGroupId = groupId.toString();
 
 		}
 	</script>

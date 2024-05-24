@@ -130,8 +130,11 @@
 		}@{
 			 if (Model.IsUser && !Model.IsJoined)
 			 {
-				 <div class="footer text-center">
-					 <a class="btn btn-success w-100" onclick="beginChatWithUser('@Model.UserId')">شروع چت</a>
+				 <div class="footer">
+
+					 <div class="footer text-center">
+						 <a class="btn btn-success w-100" onclick="beginChatWithUser('@Model.UserId')" style="position: relative">شروع چت</a>
+					 </div>
 				 </div>
 			 }else if (Model.IsJoined)
 			 {
@@ -158,7 +161,7 @@
 			 else
 			 {
 				 <div class="footer text-center">
-					 <a class="btn btn-success w-100"  onclick="joinGroup('@Model.GroupId')">پیوستن به گروه</a>
+					<a class="btn btn-success w-100" onclick="joinGroup('@Model.GroupId')" style="position: relative">پیوستن به گروه</a>
 				 </div>
 			 }
 		 }

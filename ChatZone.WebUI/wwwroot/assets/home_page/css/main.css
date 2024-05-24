@@ -34,192 +34,12 @@
 
 @media (max-width: 700px) {
   .footer input {
-    width: 40% !important;
+    width: 85% !important;
   }
   .footer button {
     width: 15% !important;
   }
-    .footer a {
-        width: 10% !important;
-        align-content: start;
-    }
 }
-
-.disConnect {
-    position: fixed;
-    width: 100%;
-    margin: 40px auto;
-    height: 100%;
-    background: rgba(0, 0, 79, 0);
-    z-index: 20;
-    border-radius: 100%;
-}
-
-    .disConnect div {
-        margin: auto;
-        top: 20%;
-        position: relative;
-        width: 20%;
-        background: white;
-        box-shadow: 0 0 5px 0 black;
-        text-align: center;
-    }
-
-@keyframes rotate-loading {
-    0% {
-        transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        -webkit-transform: rotate(0deg);
-        -o-transform: rotate(0deg);
-        -moz-transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-        -ms-transform: rotate(360deg);
-        -webkit-transform: rotate(360deg);
-        -o-transform: rotate(360deg);
-        -moz-transform: rotate(360deg);
-    }
-}
-
-@-moz-keyframes rotate-loading {
-    0% {
-        transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        -webkit-transform: rotate(0deg);
-        -o-transform: rotate(0deg);
-        -moz-transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-        -ms-transform: rotate(360deg);
-        -webkit-transform: rotate(360deg);
-        -o-transform: rotate(360deg);
-        -moz-transform: rotate(360deg);
-    }
-}
-
-@-webkit-keyframes rotate-loading {
-    0% {
-        transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        -webkit-transform: rotate(0deg);
-        -o-transform: rotate(0deg);
-        -moz-transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-        -ms-transform: rotate(360deg);
-        -webkit-transform: rotate(360deg);
-        -o-transform: rotate(360deg);
-        -moz-transform: rotate(360deg);
-    }
-}
-
-@-o-keyframes rotate-loading {
-    0% {
-        transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        -webkit-transform: rotate(0deg);
-        -o-transform: rotate(0deg);
-        -moz-transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-        -ms-transform: rotate(360deg);
-        -webkit-transform: rotate(360deg);
-        -o-transform: rotate(360deg);
-        -moz-transform: rotate(360deg);
-    }
-}
-
-@keyframes rotate-loading {
-    0% {
-        transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        -webkit-transform: rotate(0deg);
-        -o-transform: rotate(0deg);
-        -moz-transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-        -ms-transform: rotate(360deg);
-        -webkit-transform: rotate(360deg);
-        -o-transform: rotate(360deg);
-        -moz-transform: rotate(360deg);
-    }
-}
-
-@-moz-keyframes rotate-loading {
-    0% {
-        transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        -webkit-transform: rotate(0deg);
-        -o-transform: rotate(0deg);
-        -moz-transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-        -ms-transform: rotate(360deg);
-        -webkit-transform: rotate(360deg);
-        -o-transform: rotate(360deg);
-        -moz-transform: rotate(360deg);
-    }
-}
-
-@-webkit-keyframes rotate-loading {
-    0% {
-        transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        -webkit-transform: rotate(0deg);
-        -o-transform: rotate(0deg);
-        -moz-transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-        -ms-transform: rotate(360deg);
-        -webkit-transform: rotate(360deg);
-        -o-transform: rotate(360deg);
-        -moz-transform: rotate(360deg);
-    }
-}
-
-@-o-keyframes rotate-loading {
-    0% {
-        transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        -webkit-transform: rotate(0deg);
-        -o-transform: rotate(0deg);
-        -moz-transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-        -ms-transform: rotate(360deg);
-        -webkit-transform: rotate(360deg);
-        -o-transform: rotate(360deg);
-        -moz-transform: rotate(360deg);
-    }
-}
-    .loading {
-        border: 2px solid transparent;
-        border-color: transparent #fff transparent #fff;
-        -moz-animation: rotate-loading 1.5s linear 0s infinite normal;
-        -moz-transform-origin: 50% 50%;
-        -o-animation: rotate-loading 1.5s linear 0s infinite normal;
-        -o-transform-origin: 50% 50%;
-        -webkit-animation: rotate-loading 1.5s linear 0s infinite normal;
-        -webkit-transform-origin: 50% 50%;
-        animation: rotate-loading 1.5s linear 0s infinite normal;
-        transform-origin: 50% 50%;
-    }
 
 .chat-content {
   position: relative;
@@ -260,35 +80,22 @@
   overflow-y: auto;
 }
 
-    .chat-content .chats .chat-you {
-        position: relative;
-        margin-top: 10px;
-        width: 100%;
-        display: inline-block;
-        height: 100%;
-        text-align: left;
-    }
+.chat-content .chats .chat-you {
+  position: relative;
+  margin-top: 10px;
+  width: 100%;
+  display: block;
+  height: 80px;
+  text-align: left;
+}
 
 .chat-content .chats .chat-you .chat {
   background: white;
   width: fit-content;
   border-radius: 0px 40px 40px 0px;
   padding: 10px 20px;
-    height: 100%;
   position: absolute;
   left: 0;
-}
-
-.chat-content .chats .chat-you .chat .img {
-
-
-    width: 200px;
-    height: 100px;
-}
-
-.chat-content .chats .chat-me .chat .img {
-    width: 200px;
-    height: 100px;
 }
 
 .chat-content .chats .chat-you .chat P {
@@ -399,13 +206,13 @@
 .footer {
   position: fixed;
   bottom: 0;
-  width: 70%;
+  width: 67%;
   right: 0;
 }
 
 .footer input {
   display: inline;
-  width: 50%;
+  width: 90%;
   height: 50px;
   border-radius: 0 !important;
 }
@@ -413,17 +220,9 @@
 .footer button {
   display: inline;
   width: 10%;
-    position: fixed;
+  position: absolute;
   height: 50px;
 }
-.footer a {
-    display: inline;
-    width: 10%;
-    position: fixed;
-    height: 50px;
-}
-
-
 
 input:focus {
   outline: none;

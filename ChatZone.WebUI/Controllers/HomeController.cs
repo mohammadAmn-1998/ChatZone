@@ -230,7 +230,10 @@ namespace ChatZone.WebUI.Controllers
 
 			ViewBag.IsJoined = isJoined;
 			SuccessAlert("شما وارد این گروه شدید!");
+			await _hubContext.Clients.User(HttpContext.User.GetUserId().ToString())
+				.SendAsync("receiveCurrentGroupId", model.GroupId);
 			return PartialView("_ChatsPartial", model);
+
 
 
 		}
@@ -518,7 +521,7 @@ namespace ChatZone.WebUI.Controllers
 					UserId = result.UserId,
 					FileName = result.FileName,
 					UserName = HttpContext.User.GetUserName(),
-					IsCallerChat = HttpContext.User.GetUserId() == result.UserId
+					
 				};
 
 				var users = await _UserGroupService.GetGroupUsers(fileViewModel.GroupId);
@@ -527,16 +530,24 @@ namespace ChatZone.WebUI.Controllers
 				
 				foreach (var groupUserDto in users!)
 				{
-					
+					if(groupUserDto.UserId == HttpContext.User.GetUserId())
+						continue;
+
 					userIds.Add(groupUserDto.UserId.ToString());
 
 				}
 
-
+				model.IsCallerChat = true;
 				await _hubContext.Clients.User(HttpContext.User.GetUserId().ToString()).SendAsync("receiveFile",
 					model);
 
+				model.IsCallerChat = false;
+
+				await _hubContext.Clients.Users(userIds).SendAsync("receiveFile",
+					model);
+
 				SuccessAlert("فایل به گروه فرستاده شد",false);
+				
 				return new ObjectResult("success");
 
 			}

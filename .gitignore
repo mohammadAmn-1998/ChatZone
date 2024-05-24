@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 # images and vidoes
 assets/home_page/img/
+/ChatZone.WebUI/wwwroot/assets/home_page/img

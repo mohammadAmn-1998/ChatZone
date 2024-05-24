@@ -421,14 +421,14 @@ function sendFileToGroup(event) {
 
     event.preventDefault();
 
-    console.log(event);
+    
 
     var file = event.srcElement[0].files[0];
     var groupId = currentGroupId;
 
    
 
-    console.log(file);
+   
     if (!file) {
 
         ErrorAlert("فایلی انتخاب کنید و سپس ارسال را بزنید");
@@ -444,7 +444,7 @@ function sendFileToGroup(event) {
 
     var formData = new FormData();
     
-    console.log(file);
+   
 
     formData.append("file", file);
     formData.append("groupId", groupId);
@@ -462,7 +462,7 @@ function sendFileToGroup(event) {
         type: "Post",
         data: formData,
         encyType: "multipart/form-data",
-        timeout: 20000, // Set a timeout of 10 seconds (adjust as needed)
+        timeout: 20000, // Set a timeout of 20 seconds (adjust as needed)
         processData: false,
         contentType: false
 
