@@ -1,0 +1,28 @@
+﻿@model ChatZone.WebUI.ViewModels.ChatGroups.ChatGroupViewModel?
+<form  class="modal fade bd-example-modal-sm" id="file_form_modal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" enctype="multipart/form-data" onsubmit="sendFileToGroup(event)">
+	<div class="modal-dialog modal-sm" role="document" id="modal_content">
+
+		<div class="modal-content">
+			<div class="modal-header text-center justify-content-center ">
+				<h5 class="modal-title  " id="exampleModalLabel">فایلی انتخاب کنید...</h5>
+
+			</div>
+			<div class="profile-modal modal-body  text-center">
+
+				
+				<input type="file" class="form-control" accept="video/mp4,video/x-m4v,video/*,image/png,image/jpeg,image/*"/>
+				<input type="hidden" value="@Model?.GroupId"  class="form-control" />
+
+			</div>
+
+
+
+			<div class="modal-footer">
+				
+				<button type="submit" class="btn btn-primary" >ارسال</button>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">برگشتن</button>
+			</div>
+		</div>
+
+	</div>
+</form>

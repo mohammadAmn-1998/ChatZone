@@ -10,6 +10,7 @@
 
 <partial name="Modals/_AddMemberModal" />
 <partial name="Modals/_ProfileModal" model="@Model"/>
+<partial name="Modals/_SendFileModal" model="@Model" />
 @if (Model != null)
 {
 	<div class="header">
@@ -47,26 +48,81 @@
 			foreach (var chat in Model.Chats)
 			{
 
-				if (chat.IsCallerChat)
+				var extension = System.IO.Path.GetExtension(chat.FileName);
+
+				if (!string.IsNullOrEmpty(chat.FileName))
 				{
-					<div class="chat-me">
-						<div class="chat">
-							<i> شما : </i>
-							<p> @chat.ChatBody</p>
-							<span>@chat.CreateDate</span>
+					if (chat.IsCallerChat)
+					{
+						<div class="chat-me">
+							<div class="chat">
+								<i> شما : </i>
+								<br/>
+								@if (extension is ".jpg" or ".jpeg" or ".png" or ".bmp")
+								{
+									<img src="@Directories.GetChatFilePath(chat.FileName)" alt="image" />
+								}
+								else if (extension is ".mkv" or ".mp4")
+								{
+									<video width="320" height="240" controls>
+										<source src="@Directories.GetChatFilePath(chat.FileName)" type="video/@extension.Replace(".","")">
+										Your browser does not support the video tag.
+									</video>
+								}
+								
+								<p> @chat.ChatBody</p>
+								<span>@chat.CreateDate</span>
+							</div>
 						</div>
-					</div>
+					}
+					else
+					{
+						<div class="chat-you">
+							<div class="chat">
+								<i> @chat.UserName</i>
+								<br />
+								@if (extension is ".jpg" or ".jpeg" or ".png" or ".bmp")
+								{
+									<img src="@Directories.GetChatFilePath(chat.FileName)" alt="image" />
+								}
+								else if (extension is ".mkv" or ".mp4")
+								{
+									<video width="320" height="240" controls>
+										<source src="@Directories.GetChatFilePath(chat.FileName)" type="video/@extension.Replace(".","")">
+										Your browser does not support the video tag.
+									</video>
+								}
+								<p> @chat.ChatBody</p>
+								<span>@chat.CreateDate</span>
+							</div>
+						</div>
+					}
 				}
 				else
 				{
-					<div class="chat-you">
-						<div class="chat">
-							<i> @chat.UserName</i>
-							<p> @chat.ChatBody</p>
-							<span>@chat.CreateDate</span>
+					if (chat.IsCallerChat)
+					{
+						<div class="chat-me">
+							<div class="chat">
+								<i> شما : </i>
+								<p> @chat.ChatBody</p>
+								<span>@chat.CreateDate</span>
+							</div>
 						</div>
-					</div>
+					}
+					else
+					{
+						<div class="chat-you">
+							<div class="chat">
+								<i> @chat.UserName</i>
+								<p> @chat.ChatBody</p>
+								<span>@chat.CreateDate</span>
+							</div>
+						</div>
+					}
 				}
+
+				
 
 			}
 
@@ -80,14 +136,23 @@
 			 }else if (Model.IsJoined)
 			 {
 				 <div class="footer">
+					
 					 <form onsubmit="sendMessage(event)">
+						 <a class="btn btn-primary p-3" data-toggle="modal" data-target="#file_form_modal">
+							 <i class="fa fa-file"></i>فایل...
+						 </a>
 						 <input type="hidden" id="group_id" value="@Model.GroupId"/>
 						 <input type="text" id="message_text" class="form-control" placeholder="متن خود را وارد کنید">
+
 						 <button type="submit" class="btn btn-success">
 							 ارسال
 							 <i class="fa fa-send"></i>
 						 </button>
+
+
+
 					 </form>
+
 				 </div>
 			 }
 			 else

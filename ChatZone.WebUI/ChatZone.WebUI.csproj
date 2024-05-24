@@ -28,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\assets\home_page\img\chat_files\" />
     <Folder Include="wwwroot\lib\js\" />
   </ItemGroup>
 

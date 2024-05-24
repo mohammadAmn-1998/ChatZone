@@ -20,24 +20,24 @@
 
 @section scripts
 {
-
-
 	<script>
 
-		var currentGroupId = 0;
+
 		var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 
 		connection.on("receiveChat", displayNewChat);
 
 		connection.on("receiveChatNotification", displayChatNotification);
 
-		connection.on("receiveChatGroupNotification",displayNotification);
+		connection.on("receiveChatGroupNotification", displayNotification);
 
 		connection.on("receiveChatGroup", displayChatGroup);
 
 		connection.on("receiveOperationResult", displaySweetAlert);
 
 		connection.on("receiveNewChatGroup", displayNewChatGroup);
+
+		connection.on("receiveFile", displayNewFile);
 
 		function start() {
 
@@ -54,9 +54,10 @@
 
 		}
 
-		
-		
+		start();
+
 		connection.onclose(start);
+
 
 		function displayChatNotification(data) {
 
@@ -69,8 +70,6 @@
 					});
 
 			}
-
-
 		}
 
 		function displayNotification(data) {
@@ -78,9 +77,9 @@
 			var title = data.title;
 			var body = data.body;
 			var notification = new Notification(title,
-					{
-						body: body
-					});
+				{
+					body: body
+				});
 
 
 		}
@@ -105,14 +104,12 @@
 
 			}
 
-
 		}
 
 		function displayNewChatGroup(userGroup) {
 
 			if (!userGroup)
 				return;
-
 
 
 			$("#search_ul").prepend(`
@@ -143,8 +140,13 @@
 			var userId = data.userId;
 			var userId = data.userId;
 			var isCallerChat = data.isCallerChat;
-			if (isCallerChat) {
 
+			console.log("test");
+			if (currentGroupId !== data.groupId.toString() || currentGroupId === "undefined")
+				return;
+			console.log("test2");
+			if (isCallerChat) {
+				console.log("test2");
 
 				$(".chats").append(`
 																		<div class="chat-me">
@@ -180,7 +182,110 @@
 																		`);
 
 		}
-	</script>
 
+		function displayNewFile(data) {
+
+			console.log(data);
+
+			var caption = data.chatBody;
+			if (!caption) {
+				caption = " ";
+			}
+			var userName = data.userName;
+			var createDate = data.createDate;
+			var groupId = data.groupId;
+			var isCallerChat = data.isCallerChat;
+			var fileName = data.fileName;
+
+
+			var extension = fileName.split('.').pop();
+			console.log(extension);
+
+			if (extension === 'jpg' || extension === 'bmp' || extension === 'jpeg' || extension === 'png') {
+
+
+				if (groupId.toString() === currentGroupId) {
+
+					if (isCallerChat) {
+
+
+						$(".chats").append(`
+																		<div class="chat-me">
+																			<div class="chat">
+																					<i> شما : </i>
+																					<br/>
+																				<img src="/assets/home_page/img/chat_files/${fileName}" alt="image"></img>
+																				<br/>
+																						<p> ${caption}</p>
+																				<span>${createDate}</span>
+																			</div>
+																		</div>`);
+
+
+					} else {
+
+						$(".chats").append(`
+																		<div class="chat-you">
+																			<div class="chat">
+																					<i>${userName}</i>
+																							<br/>
+																					
+																										<img src="/assets/home_page/img/chat_files/${fileName}" alt="image"></img>
+																										<br/>
+																												<p> ${caption}</p>
+																						<span>${createDate}</span>
+																			</div>
+																		</div>`);
+					}
+				}
+
+
+			} else if (extension === 'mkv' || extension === 'mp4') {
+
+				if (groupId.toString() === currentGroupId) {
+
+					if (isCallerChat) {
+
+
+						$(".chats").append(`
+																				<div class="chat-me">
+																					<div class="chat">
+																							<i> شما : </i>
+																							<br/>
+																								<video width="320" height="240" controls>
+		<source src="/assets/home_page/img/chat_files/${fileName}" type="video/${extension}">
+		Your browser does not support the video tag.
+		</video>
+																						<br/>
+																								<p> ${caption}</p>
+																						<span>${createDate}</span>
+																					</div>
+																				</div>`);
+
+
+					} else {
+
+						$(".chats").append(`
+																				<div class="chat-you">
+																					<div class="chat">
+																							<i>${userName}</i>
+																									<br/>
+
+																															<video width="320" height="240" controls>
+				<source src="/assets/home_page/img/chat_files/${fileName}" type="video/${extension}">
+				Your browser does not support the video tag.
+				</video>
+																												<br/>
+																														<p> ${caption}</p>
+																								<span>${createDate}</span>
+																					</div>
+																				</div>`);
+					}
+				}
+
+			}
+
+		}
+	</script>
 
 }

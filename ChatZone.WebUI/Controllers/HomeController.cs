@@ -445,6 +445,109 @@ namespace ChatZone.WebUI.Controllers
 
 		}
 
+		[HttpPost]
+		public async Task<IActionResult> SendFileToGroup([FromForm] SendFileViewModel? fileViewModel)
+		{
+
+			if (fileViewModel == null)
+			{
+				ErrorAlert("مشکلی به وجود آمده است");
+				return new ObjectResult("Error");
+			}
+
+			if (fileViewModel.File == null )
+			{
+				ErrorAlert("فایلی انتخاب نشده است");
+				return new ObjectResult("Error");
+			}
+
+
+
+			var fileExtension = Path.GetExtension(fileViewModel.File!.FileName);
+
+			if (fileExtension is ".jpg" or ".png" or ".bmp" or "jpeg" or ".mkv" or ".mp4")
+			{
+
+				if (fileExtension is ".bmp" or "mkv" or "mp4")
+				{
+
+					if (fileViewModel.File.Length > 1250000) //equal to 100 megabytes
+					{
+
+						ErrorAlert("اندازه فایل باید کمتر از10 مگابایت باشد");
+						return new ObjectResult("Error");
+
+					}
+
+				}
+
+				var fileName = await 
+					_fileManagerService.UploadFileAndReturnFileName(fileViewModel.File, Directories.GetChatFilesDirectory());
+
+				if (fileName is null)
+				{
+					ErrorAlert("مشکلی در سرور به وجود آمده دوبار تلاش کنید.",false);
+					return new ObjectResult("Error");
+				}
+
+
+				var chatDto = new ChatDto
+				{
+					
+					CreateDate = DateTime.Now,
+					ChatBody = fileViewModel.Caption,
+					GroupId = fileViewModel.GroupId,
+					UserId = HttpContext.User.GetUserId(),
+					FileName = fileName,
+					
+				};
+
+				var result = await _chatService.InsertChat(chatDto);
+
+				if (result == null)
+				{
+					ErrorAlert("مشکلی در سرور به وجود آمده دوبار تلاش کنید.", false);
+					return new ObjectResult("Error");
+				}
+
+				var model = new ChatViewModel
+				{
+					ChatBody = result.ChatBody,
+					GroupId = result.GroupId,
+					CreateDate = result.CreateDate.ConvertToPersianDate(),
+					UserId = result.UserId,
+					FileName = result.FileName,
+					UserName = HttpContext.User.GetUserName(),
+					IsCallerChat = HttpContext.User.GetUserId() == result.UserId
+				};
+
+				var users = await _UserGroupService.GetGroupUsers(fileViewModel.GroupId);
+
+				var userIds = new List<string>();
+				
+				foreach (var groupUserDto in users!)
+				{
+					
+					userIds.Add(groupUserDto.UserId.ToString());
+
+				}
+
+
+				await _hubContext.Clients.User(HttpContext.User.GetUserId().ToString()).SendAsync("receiveFile",
+					model);
+
+				SuccessAlert("فایل به گروه فرستاده شد",false);
+				return new ObjectResult("success");
+
+			}
+			else
+			{
+				ErrorAlert("فایل باید یا تصویر باشد یا ویدیو", false);
+				return new ObjectResult("Error");
+			}
+			
+		}
+
 		#region private helper Methods
 
 		private ChatGroupViewModel FixPrivateChatGroup(ChatGroupDto dto,long userId)

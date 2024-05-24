@@ -34,11 +34,15 @@
 
 @media (max-width: 700px) {
   .footer input {
-    width: 85% !important;
+    width: 40% !important;
   }
   .footer button {
     width: 15% !important;
   }
+    .footer a {
+        width: 10% !important;
+        align-content: start;
+    }
 }
 
 .disConnect {
@@ -256,22 +260,35 @@
   overflow-y: auto;
 }
 
-.chat-content .chats .chat-you {
-  position: relative;
-  margin-top: 10px;
-  width: 100%;
-  display: block;
-  height: 80px;
-  text-align: left;
-}
+    .chat-content .chats .chat-you {
+        position: relative;
+        margin-top: 10px;
+        width: 100%;
+        display: inline-block;
+        height: 100%;
+        text-align: left;
+    }
 
 .chat-content .chats .chat-you .chat {
   background: white;
   width: fit-content;
   border-radius: 0px 40px 40px 0px;
   padding: 10px 20px;
+    height: 100%;
   position: absolute;
   left: 0;
+}
+
+.chat-content .chats .chat-you .chat .img {
+
+
+    width: 200px;
+    height: 100px;
+}
+
+.chat-content .chats .chat-me .chat .img {
+    width: 200px;
+    height: 100px;
 }
 
 .chat-content .chats .chat-you .chat P {
@@ -382,13 +399,13 @@
 .footer {
   position: fixed;
   bottom: 0;
-  width: 67%;
+  width: 70%;
   right: 0;
 }
 
 .footer input {
   display: inline;
-  width: 90%;
+  width: 50%;
   height: 50px;
   border-radius: 0 !important;
 }
@@ -396,9 +413,17 @@
 .footer button {
   display: inline;
   width: 10%;
-  position: absolute;
+    position: fixed;
   height: 50px;
 }
+.footer a {
+    display: inline;
+    width: 10%;
+    position: fixed;
+    height: 50px;
+}
+
+
 
 input:focus {
   outline: none;

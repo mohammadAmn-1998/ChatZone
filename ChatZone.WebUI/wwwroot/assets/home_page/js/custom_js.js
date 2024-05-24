@@ -17,15 +17,17 @@ $(document).ready(function () {
 
     }
 
-    var result = getCookie("systemAlert");
-    if (result) {
+    //var result = getCookie("systemAlert");
+    //if (result) {
 
-        result = JSON.parse(result);
+    //    result = JSON.parse(result);
 
 
-    }
+    //}
 
 });
+
+var currentGroupId = 0;
 
 function createNewGroup(event) {
 
@@ -170,8 +172,7 @@ function getGroupChats(event) {
         $("#chat_content").html(data);
 
         currentGroupId = $("#group_id").val();
-        console.log("validating currentGroupId :");
-        console.log(currentGroupId);
+       
     });
 
 
@@ -342,7 +343,7 @@ function addMember(event) {
                         $(this).append(`<div class="p-2 w-100">${result.userName}<span>(عضو)</span>
 							</div>`);
 
-                        console.log(this);
+                        
                     }
 
 
@@ -414,6 +415,69 @@ function getUserPrivateChats(event) {
     });
 
 
+}
+
+function sendFileToGroup(event) {
+
+    event.preventDefault();
+
+    console.log(event);
+
+    var file = event.srcElement[0].files[0];
+    var groupId = currentGroupId;
+
+   
+
+    console.log(file);
+    if (!file) {
+
+        ErrorAlert("فایلی انتخاب کنید و سپس ارسال را بزنید");
+        return;
+
+    }
+
+    const allowedExtensions = /(\.jpg|\.jpeg|\.png|\.bmp|\.mkv|\.mp4)$/i;
+    if (!allowedExtensions.test(file.name)) {
+        alert('نوع فایل نامعتبر است. فقط JPG، JPEG، PNG و BMP ،mp4 ،mkv مجاز هستند.');
+        return;
+    }
+
+    var formData = new FormData();
+    
+    console.log(file);
+
+    formData.append("file", file);
+    formData.append("groupId", groupId);
+    var caption = $("#message_text").val();
+
+    if (caption) {
+        formData.append("caption", caption);
+    }
+   
+
+    
+    $.ajax({
+
+        url: "/Home/SendFileToGroup",
+        type: "Post",
+        data: formData,
+        encyType: "multipart/form-data",
+        timeout: 20000, // Set a timeout of 10 seconds (adjust as needed)
+        processData: false,
+        contentType: false
+
+    }).done(function (result) {
+
+
+        if (result === "success") {
+
+            $("#file_form_modal").fadeOut();
+
+        }
+        
+
+    });
+    
 }
 
 function handleAddMemberModalButton(parameters) {
