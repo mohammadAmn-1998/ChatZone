@@ -363,9 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # images and vidoes
-.jpeg
-.jpg
-.mkv
-.mp3
-.bmp
-.png
+/assets/home_page/img/
